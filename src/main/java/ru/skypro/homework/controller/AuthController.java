@@ -20,14 +20,15 @@ import static ru.skypro.homework.dto.Role.USER;
 @RestController
 @RequiredArgsConstructor
 public class AuthController {
-
-    private final AuthService authService;
+        private final AuthService authService;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginReq req) {
         if (authService.login(req.getUsername(), req.getPassword())) {
+            log.info("залогинился успешно");
             return ResponseEntity.ok().build();
         } else {
+            log.info("в доступе отказано");
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }
