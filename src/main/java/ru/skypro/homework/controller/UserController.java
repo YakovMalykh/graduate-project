@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.skypro.homework.dto.CreateUser;
 import ru.skypro.homework.dto.NewPassword;
 import ru.skypro.homework.dto.ResponseWrapperUser;
 import ru.skypro.homework.dto.User;
@@ -19,11 +20,21 @@ import ru.skypro.homework.dto.User;
 @RequiredArgsConstructor
 public class UserController {
 
-    // метод addUser принимает и возвращает сущность CreateUser
-
-
-    // метод getUsers возвращает сущность ResponseWrapperUser
-
+    @Operation(
+            summary = "добавляем пользователя",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "OK",
+                            content = @Content(schema = @Schema(implementation = CreateUser.class))),
+                    @ApiResponse(responseCode = "401", description = "Unauthorised"),
+                    @ApiResponse(responseCode = "403", description = "Forbidden"),
+                    @ApiResponse(responseCode = "404", description = "Not Found")
+            }
+    )
+    @PostMapping("/add_user")
+    public ResponseEntity<CreateUser> addUser() {
+        log.info("метод добавления пользователя");
+        return ResponseEntity.ok(new CreateUser());
+    }
 
     @Operation(
             summary = "выводим всех пользователей",
@@ -41,9 +52,6 @@ public class UserController {
         return ResponseEntity.ok(new ResponseWrapperUser());
     }
 
-
-    // метод updateUser
-
     @Operation(
             summary = "обновляем существующего пользователя",
             responses = {
@@ -60,7 +68,6 @@ public class UserController {
         return ResponseEntity.ok(new User());
     }
 
-    // метод setPassword
     @Operation(
             summary = "устанавливаем пользователю новый пароль",
             responses = {
@@ -78,10 +85,6 @@ public class UserController {
         return ResponseEntity.ok(new NewPassword());
     }
 
-
-
-
-    // метод getUser
 
     @Operation(
             summary = "получаем пользователя по ID",
