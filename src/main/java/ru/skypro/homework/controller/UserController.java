@@ -8,6 +8,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.skypro.homework.dto.CreateUser;
+import ru.skypro.homework.dto.NewPassword;
+import ru.skypro.homework.dto.ResponseWrapperUser;
 import ru.skypro.homework.dto.User;
 
 @Slf4j
@@ -17,8 +20,37 @@ import ru.skypro.homework.dto.User;
 @RequiredArgsConstructor
 public class UserController {
 
-    // метод addUser принимает и возвращает сущность CreateUser
-    // метод getUser возвращает сущность ResponseWrapperUser
+    @Operation(
+            summary = "добавляем пользователя",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "OK",
+                            content = @Content(schema = @Schema(implementation = CreateUser.class))),
+                    @ApiResponse(responseCode = "401", description = "Unauthorised"),
+                    @ApiResponse(responseCode = "403", description = "Forbidden"),
+                    @ApiResponse(responseCode = "404", description = "Not Found")
+            }
+    )
+    @PostMapping("/add_user")
+    public ResponseEntity<CreateUser> addUser() {
+        log.info("метод добавления пользователя");
+        return ResponseEntity.ok(new CreateUser());
+    }
+
+    @Operation(
+            summary = "выводим всех пользователей",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "OK",
+                            content = @Content(schema = @Schema(implementation = ResponseWrapperUser.class))),
+                    @ApiResponse(responseCode = "401", description = "Unauthorised"),
+                    @ApiResponse(responseCode = "403", description = "Forbidden"),
+                    @ApiResponse(responseCode = "404", description = "Not Found")
+            }
+    )
+    @GetMapping("/me")
+    public ResponseEntity<ResponseWrapperUser> getUsers() {
+        log.info("метод вывода списка всех пользователей");
+        return ResponseEntity.ok(new ResponseWrapperUser());
+    }
 
     @Operation(
             summary = "обновляем существующего пользователя",
@@ -31,14 +63,28 @@ public class UserController {
             }
     )
     @PatchMapping("/me")
-    public ResponseEntity<User> updateUser(
-            @RequestBody User user
-    ) {
+    public ResponseEntity<User> updateUser(@RequestBody User user) {
         log.info("метод обновления существующего пользователя");
         return ResponseEntity.ok(new User());
     }
 
-    // метод setPassword
+    @Operation(
+            summary = "устанавливаем пользователю новый пароль",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "OK",
+                            content = @Content(schema = @Schema(implementation = NewPassword.class))),
+                    @ApiResponse(responseCode = "401", description = "Unauthorised"),
+                    @ApiResponse(responseCode = "403", description = "Forbidden"),
+                    @ApiResponse(responseCode = "404", description = "Not Found")
+            }
+    )
+    @PostMapping("/set_password")
+    public ResponseEntity<NewPassword> setPassword(@PathVariable String currentPassword,
+                                                   @PathVariable String newPassword) {
+        log.info("метод установки пользователю нового пароля");
+        return ResponseEntity.ok(new NewPassword());
+    }
+
 
     @Operation(
             summary = "получаем пользователя по ID",
