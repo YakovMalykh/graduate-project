@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.skypro.homework.dto.CreateUser;
 import ru.skypro.homework.dto.NewPassword;
 import ru.skypro.homework.dto.ResponseWrapperUser;
 import ru.skypro.homework.dto.User;
@@ -20,23 +19,7 @@ import ru.skypro.homework.dto.User;
 @RequiredArgsConstructor
 public class UserController {
 
-    @Operation(
-            summary = "добавляем пользователя",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "OK",
-                            content = @Content(schema = @Schema(implementation = CreateUser.class))),
-                    @ApiResponse(responseCode = "401", description = "Unauthorised"),
-                    @ApiResponse(responseCode = "403", description = "Forbidden"),
-                    @ApiResponse(responseCode = "404", description = "Not Found")
-            }
-    )
-    @PostMapping("/add_user")
-    public ResponseEntity<CreateUser> addUser() {
-        log.info("метод добавления пользователя");
-        return ResponseEntity.ok(new CreateUser());
-    }
-
-    @Operation(
+       @Operation(
             summary = "выводим всех пользователей",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK",
@@ -79,8 +62,7 @@ public class UserController {
             }
     )
     @PostMapping("/set_password")
-    public ResponseEntity<NewPassword> setPassword(@PathVariable String currentPassword,
-                                                   @PathVariable String newPassword) {
+    public ResponseEntity<NewPassword> setPassword(@RequestBody NewPassword currentPassword) {
         log.info("метод установки пользователю нового пароля");
         return ResponseEntity.ok(new NewPassword());
     }
