@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.bytebuddy.implementation.bind.annotation.Empty;
-import net.bytebuddy.pool.TypePool;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.*;
@@ -26,60 +25,60 @@ public class AdsController {
     @Operation(summary = "добавляем новое объявление",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK",
-                            content = @Content(schema = @Schema(implementation = Ads.class))),
+                            content = @Content(schema = @Schema(implementation = AdsDto.class))),
                     @ApiResponse(responseCode = "201", description = "created"),
                     @ApiResponse(responseCode = "401", description = "Unauthorized"),
                     @ApiResponse(responseCode = "403", description = "Forbidden"),
                     @ApiResponse(responseCode = "404", description = "Not Found")
             })
-    @PostMapping()
-    public ResponseEntity<CreateAds> addAds(
-            @Parameter(description = "передаем заполненное объявление") @RequestBody Ads ads
+    @PostMapping("/")
+    public ResponseEntity<CreateAdsDto> addAds(
+            @Parameter(description = "передаем заполненное объявление") @RequestBody AdsDto adsDto
     ) {
         log.info("метод добавления нового объявления");
-        return ResponseEntity.ok(new CreateAds());
+        return ResponseEntity.ok(new CreateAdsDto());
     }
 
     @Operation(summary = "получаем список всех объявлений",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK",
-                            content = @Content(schema = @Schema(implementation = ResponseWrapperAds.class))),
+                            content = @Content(schema = @Schema(implementation = ResponseWrapperAdsDto.class))),
                     @ApiResponse(responseCode = "401", description = "Unauthorized"),
                     @ApiResponse(responseCode = "403", description = "Forbidden"),
                     @ApiResponse(responseCode = "404", description = "Not Found")
             })
-    @GetMapping()
-    public ResponseEntity<Collection<ResponseWrapperAds>> getAllAds() {
+    @GetMapping("/")
+    public ResponseEntity<ResponseWrapperAdsDto> getAllAds() {
         log.info("метод получения всех объявлений");
-        return ResponseEntity.ok(List.of(new ResponseWrapperAds()));
+        return ResponseEntity.ok(new ResponseWrapperAdsDto());
     }
 
     @Operation(summary = "получаем объявление (по его ID) ",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK",
-                            content = @Content(schema = @Schema(implementation = FullAds.class))),
+                            content = @Content(schema = @Schema(implementation = FullAdsDto.class))),
                     @ApiResponse(responseCode = "401", description = "Unauthorized"),
                     @ApiResponse(responseCode = "403", description = "Forbidden"),
                     @ApiResponse(responseCode = "404", description = "Not Found")
             })
     @GetMapping("/{id}")
-    public ResponseEntity<FullAds> getAds(
+    public ResponseEntity<FullAdsDto> getAds(
             @Parameter(description = "передаем ID объявления") @PathVariable Integer id) {
         log.info("метод получения объявления по его id");
-        return ResponseEntity.ok(new FullAds());
+        return ResponseEntity.ok(new FullAdsDto());
     }
 
     @Operation(summary = "получаем объявления обращающегося пользователя",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK",
-                            content = @Content(schema = @Schema(implementation = ResponseWrapperAds.class))),
+                            content = @Content(schema = @Schema(implementation = ResponseWrapperAdsDto.class))),
                     @ApiResponse(responseCode = "401", description = "Unauthorized",
                             content = @Content(schema = @Schema(implementation = Empty.class))),
                     @ApiResponse(responseCode = "403", description = "Forbidden"),
                     @ApiResponse(responseCode = "404", description = "Not Found")
             })
     @GetMapping("/me")
-    public ResponseEntity<Collection<ResponseWrapperAds>> getAdsMe(
+    public ResponseEntity<ResponseWrapperAdsDto> getAdsMe(
             @Parameter(description = "true/false") @RequestParam(required = false) Boolean authenticated,
             @Parameter(description = "authorities[0].authority") @RequestParam(required = false) String authority,
             @Parameter(description = "credentials") @RequestParam(required = false) Object credentials,
@@ -87,24 +86,24 @@ public class AdsController {
             @Parameter(description = "principal") @RequestParam(required = false) Object principal
     ) {
         log.info("метод получения всех объявлений данного пользователя");
-        return ResponseEntity.ok(List.of(new ResponseWrapperAds()));
+        return ResponseEntity.ok(new ResponseWrapperAdsDto());
     }
 
     @Operation(summary = "обновляем объявление по его id",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK",
-                            content = @Content(schema = @Schema(implementation = Ads.class))),
+                            content = @Content(schema = @Schema(implementation = AdsDto.class))),
                     @ApiResponse(responseCode = "204", description = "No Content"),
                     @ApiResponse(responseCode = "401", description = "Unauthorized"),
                     @ApiResponse(responseCode = "403", description = "Forbidden")
             })
     @PatchMapping("/{id}")
-    public ResponseEntity<Ads> updateAds(
+    public ResponseEntity<AdsDto> updateAds(
             @Parameter(description = "передаем ID объявления") @PathVariable Integer id,
-            @RequestBody Ads ads
+            @RequestBody AdsDto adsDto
     ) {
         log.info("метод обновления объявления");
-        return ResponseEntity.ok(new Ads());
+        return ResponseEntity.ok(new AdsDto());
     }
 
     @Operation(summary = "удаляем объявление (по его ID) ",
@@ -123,21 +122,21 @@ public class AdsController {
     @Operation(summary = "доавляем новый комментарий к обявлению",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK",
-                            content = @Content(schema = @Schema(implementation = AdsComment.class))),
+                            content = @Content(schema = @Schema(implementation = AdsCommentDto.class))),
                     @ApiResponse(responseCode = "201", description = "created"),
                     @ApiResponse(responseCode = "401", description = "Unauthorized"),
                     @ApiResponse(responseCode = "403", description = "Forbidden"),
                     @ApiResponse(responseCode = "404", description = "Not Found")
             })
     @PostMapping("/{adsPk}/comment")
-    public ResponseEntity<AdsComment> addAdsComment(
+    public ResponseEntity<AdsCommentDto> addAdsComment(
             @Parameter(description = "передаем заполненный комментарий")
-            @RequestBody AdsComment adsComment,
+            @RequestBody AdsCommentDto adsCommentDto,
             @Parameter(description = "передаем первичный ключ обявления")
             @PathVariable Integer adsPk
     ) {
         log.info("метод доавления нового комментария");
-        return ResponseEntity.ok(new AdsComment());
+        return ResponseEntity.ok(new AdsCommentDto());
     }
 
     @Operation(summary = "получаем список всех комментариев у данного обяъвления",
@@ -148,11 +147,11 @@ public class AdsController {
                     @ApiResponse(responseCode = "404", description = "Not Found")
             })
     @GetMapping("/{adsPk}/comment")
-    public ResponseEntity<Collection<ResponseWrapperAdsComment>> getAdsComments(
+    public ResponseEntity<Collection<ResponseWrapperAdsCommentDto>> getAdsComments(
             @Parameter(description = "передаем первичный ключ обявления")
             @PathVariable Integer adsPk) {
         log.info("метод получения всех комментариев");
-        return ResponseEntity.ok(List.of(new ResponseWrapperAdsComment()));
+        return ResponseEntity.ok(List.of(new ResponseWrapperAdsCommentDto()));
     }
 
     @Operation(summary = "получаем комментарий (по его ID) у данного обяъвления (по его первичному ключу)",
@@ -163,13 +162,13 @@ public class AdsController {
                     @ApiResponse(responseCode = "404", description = "Not Found")
             })
     @GetMapping("/{adsPk}/comment/{id}")
-    public ResponseEntity<AdsComment> getAdsComment(
+    public ResponseEntity<AdsCommentDto> getAdsComment(
             @Parameter(description = "передаем первичный ключ обявления")
             @PathVariable Integer adsPk,
             @Parameter(description = "передаем ID комментария")
             @PathVariable Integer id) {
         log.info("метод получения одного комментария");
-        return ResponseEntity.ok(new AdsComment());
+        return ResponseEntity.ok(new AdsCommentDto());
     }
 
     @Operation(summary = "удаляем комментарий (по его ID) у данного обяъвления (по его первичному ключу)",
@@ -195,12 +194,12 @@ public class AdsController {
                     @ApiResponse(responseCode = "403", description = "Forbidden")
             })
     @PatchMapping("/{adsPk}/comment/{id}")
-    public ResponseEntity<AdsComment> updateAdsComment(
+    public ResponseEntity<AdsCommentDto> updateAdsComment(
             @PathVariable Integer adsPk,
             @PathVariable Integer id,
-            @RequestBody AdsComment adsComment
+            @RequestBody AdsCommentDto adsCommentDto
     ) {
         log.info("метод обновления комментария");
-        return ResponseEntity.ok(new AdsComment());
+        return ResponseEntity.ok(new AdsCommentDto());
     }
 }

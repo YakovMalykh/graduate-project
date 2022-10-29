@@ -1,11 +1,10 @@
 package ru.skypro.homework.dto;
 
 import lombok.Data;
-
 import java.util.List;
 
 @Data
-public class ResponseWrapperAdsComment {
+public class ResponseWrapperUserDto {
     private Integer count;
-    private List<AdsComment> result;
+    private List<UserDto> result;
 }
