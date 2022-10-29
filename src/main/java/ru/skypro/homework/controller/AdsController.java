@@ -23,9 +23,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdsController {
 
-    /*
-     * методы по работе с объявленими
-     */
     @Operation(summary = "добавляем новое объявление",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK",
@@ -123,9 +120,6 @@ public class AdsController {
         return ResponseEntity.status(204).build();
     }
 
-    /*
-     * методы по работе с комментариями к объявленим
-     */
     @Operation(summary = "доавляем новый комментарий к обявлению",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK",
