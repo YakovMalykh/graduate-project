@@ -3,7 +3,7 @@ package ru.skypro.homework.dto;
 import lombok.Data;
 
 @Data
-public class CreateUser {
+public class CreateUserDto {
     private String email;
     private String firstName;
     private String lastName;
