@@ -12,9 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.*;
 
-import java.util.Collection;
-import java.util.List;
-
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
@@ -26,7 +23,6 @@ public class AdsController {
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK",
                             content = @Content(schema = @Schema(implementation = AdsDto.class))),
-                    @ApiResponse(responseCode = "201", description = "created"),
                     @ApiResponse(responseCode = "401", description = "Unauthorized"),
                     @ApiResponse(responseCode = "403", description = "Forbidden"),
                     @ApiResponse(responseCode = "404", description = "Not Found")
@@ -123,7 +119,6 @@ public class AdsController {
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK",
                             content = @Content(schema = @Schema(implementation = AdsCommentDto.class))),
-                    @ApiResponse(responseCode = "201", description = "created"),
                     @ApiResponse(responseCode = "401", description = "Unauthorized"),
                     @ApiResponse(responseCode = "403", description = "Forbidden"),
                     @ApiResponse(responseCode = "404", description = "Not Found")
@@ -147,11 +142,11 @@ public class AdsController {
                     @ApiResponse(responseCode = "404", description = "Not Found")
             })
     @GetMapping("/{adsPk}/comment")
-    public ResponseEntity<Collection<ResponseWrapperAdsCommentDto>> getAdsComments(
+    public ResponseEntity<ResponseWrapperAdsCommentDto> getAdsComments(
             @Parameter(description = "передаем первичный ключ обявления")
             @PathVariable Integer adsPk) {
         log.info("метод получения всех комментариев");
-        return ResponseEntity.ok(List.of(new ResponseWrapperAdsCommentDto()));
+        return ResponseEntity.ok(new ResponseWrapperAdsCommentDto());
     }
 
     @Operation(summary = "получаем комментарий (по его ID) у данного обяъвления (по его первичному ключу)",
