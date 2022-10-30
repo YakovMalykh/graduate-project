@@ -18,7 +18,7 @@ import ru.skypro.homework.dto.*;
 @RequestMapping("/ads")
 @RequiredArgsConstructor
 public class AdsController {
-
+ 
     @Operation(summary = "добавляем новое объявление",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK",
