@@ -16,19 +16,16 @@ import java.util.Objects;
 public class Comment {
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
-    private Long id;
+    @Column(name = "comment_id")
+    private Long id;//поле pk из AdsCommentDto похоже сюда нужно мапить, т.к. мы ПК объявления
+    // передаем в пути при создании комментария, зачем это делать, если бы он был в теле (в
+    // JSON)
 
-    @Column(name = "author_id")//здесь тоже ссылка на User может быть нужна?
+    @Column(name = "author_id")
     private Long author;
 
-    // вероятно нужно так прописывать здесь поле, так в БД должен сохраниться Id
-    // обявления, в объявлении в свою очередь нкжно установить связь @OneToMany
-    // на поле List<Comment> comments
-//    @ManyToOne
-//    @Column(name = "ads_id")
-//    private Ads ads;
     @Column(name = "ads_id")
-    private Long adsId;
+    private Long adsId;// откуда его брать???
 
     @Column(name = "comment_created")
     private LocalDateTime createdAt;
