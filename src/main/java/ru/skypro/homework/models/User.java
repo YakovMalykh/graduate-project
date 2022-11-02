@@ -6,42 +6,40 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
-import java.util.Objects;
 
 @Entity
 @Getter
 @Setter
 @ToString
 @RequiredArgsConstructor
-@Table(name = "user")
+@Table(name = "users")
 public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "user_id")
     private Long id;
 
-    @Column(name = "first_name")
+    @Column(name = "user_first_name")
     private String firstName;
 
-    @Column(name = "last_name")
+    @Column(name = "user_last_name")
     private String lastName;
 
-    @Column(name = "email")
+    @Column(name = "user_email")
     private String email;
 
-    @Column(name = "phone")
+    @Column(name = "user_phone_number")
     private String phone;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        User user = (User) o;
-        return Objects.equals(id, user.id) && Objects.equals(firstName, user.firstName) && Objects.equals(lastName, user.lastName) && Objects.equals(email, user.email) && Objects.equals(phone, user.phone);
-    }
+    @Column(name = "user_password")
+    private String password;
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, firstName, lastName, email, phone);
-    }
+    @Column(name = "user_role")
+    private String role;
+
+
+
+
+
+
 }
