@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -16,6 +17,7 @@ import javax.persistence.*;
 public class User {
 
     @Id
+    @GeneratedValue (strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
     private Long id;
 
@@ -37,9 +39,16 @@ public class User {
     @Column(name = "user_role")
     private String role;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id) && Objects.equals(firstName, user.firstName) && Objects.equals(lastName, user.lastName) && Objects.equals(email, user.email) && Objects.equals(phone, user.phone) && Objects.equals(password, user.password) && Objects.equals(role, user.role);
+    }
 
-
-
-
-
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, firstName, lastName, email, phone, password, role);
+    }
 }
