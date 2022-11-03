@@ -1,59 +1,87 @@
 package ru.skypro.homework.mappers;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
 import ru.skypro.homework.dto.AdsCommentDto;
-import ru.skypro.homework.models.Ads;
 import ru.skypro.homework.models.Comment;
-import ru.skypro.homework.models.User;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static ru.skypro.homework.constant.ConstantForTests.*;
 
 
 class CommentMapperTest {
 
     //нужно мокать репозиторий
-    private static final String DATE_FORMAT = "dd-MM-yyyy HH:mm:ss";
-    private static final String DATE = "10-12-2000 10:11:11";
     CommentMapper mapper = Mappers.getMapper(CommentMapper.class);
-    private final LocalDateTime parse = LocalDateTime.parse(DATE, DateTimeFormatter.ofPattern(DATE_FORMAT));
-    private final Ads ads = new Ads();
-    private final User author = new User();
+
+    @BeforeEach
+    void setUp() {
+        AUTHOR_1.setId(1L);
+        AUTHOR_2.setId(2L);
+
+        TEST_COMMENT_1.setId(1L);
+        TEST_COMMENT_1.setAuthor(AUTHOR_1);
+        TEST_COMMENT_1.setAdsId(ADS);
+        TEST_COMMENT_1.setCreatedAt(PARSE_DATE);
+        TEST_COMMENT_1.setText(TEXT);
+
+        TEST_COMMENT_2.setId(2L);
+        TEST_COMMENT_2.setAuthor(AUTHOR_2);
+        TEST_COMMENT_2.setAdsId(ADS);
+        TEST_COMMENT_2.setCreatedAt(PARSE_DATE);
+        TEST_COMMENT_2.setText(TEXT_2);
+
+        ADS_COMMENT_DTO.setPk(1);
+        ADS_COMMENT_DTO.setAuthor(1);
+        ADS_COMMENT_DTO.setCreatedAt(PARSE_DATE);
+        ADS_COMMENT_DTO.setText(TEXT);
+
+        LIST_COMMENTS.add(TEST_COMMENT_1);
+        LIST_COMMENTS.add(TEST_COMMENT_2);
+    }
 
     @Test
     void commentToAdsCommentDto_whenMaps_thenCorrect() {
-        author.setId(2L);
 
-        Comment comment = new Comment();
-        comment.setId(1L);
-        comment.setAuthor(author);
-        comment.setCreatedAt(parse);
-        comment.setText("text");
-
-        AdsCommentDto adsCommentDto = mapper.commentToAdsCommentDto(comment);
-        assertEquals(1,adsCommentDto.getPk());
-        assertEquals(2,adsCommentDto.getAuthor());
-        assertEquals(parse,adsCommentDto.getCreatedAt());
-        assertEquals("text",adsCommentDto.getText());
+        AdsCommentDto adsCommentDto = mapper.commentToAdsCommentDto(TEST_COMMENT_2);
+        assertEquals(2, adsCommentDto.getPk());
+        assertEquals(2, adsCommentDto.getAuthor());
+        assertEquals(PARSE_DATE, adsCommentDto.getCreatedAt());
+        assertEquals("text 2", adsCommentDto.getText());
     }
 
     @Test
     void adsCommentDtoToComment_whenMaps_thenCorrect() {
-        AdsCommentDto adsCommentDto = new AdsCommentDto();
-        adsCommentDto.setPk(2);
-        adsCommentDto.setAuthor(1);
-        adsCommentDto.setCreatedAt(parse);
-        adsCommentDto.setText("text");
 
-        Comment comment = mapper.adsCommentDtoToComment(adsCommentDto);
+        Comment comment = mapper.adsCommentDtoToComment(ADS_COMMENT_DTO);
 
-        assertEquals(2L,comment.getId());
+        assertEquals(1L, comment.getId());
 //        assertEquals(1, comment.getAuthor());//сначала нужно прописать логику в маппере по обращению к нужному репозиторию
-        assertEquals(parse, comment.getCreatedAt());
-        assertEquals("text",comment.getText());
+        assertEquals(PARSE_DATE, comment.getCreatedAt());
+        assertEquals("text", comment.getText());
 
+    }
+
+    @Test
+    void userToInteger_whenSuccess() {
+        AUTHOR_2.setId(2L);
+        Integer result = mapper.userToInteger(AUTHOR_2);
+        assertEquals(2, result.longValue());
+    }
+
+    @Test
+    void integerToUser() {
+        // прописать когда будет готов UserRepository, нужно мокать
+    }
+
+    @Test
+    void listCommentsToListAdsCommentDto() {
+
+        List<AdsCommentDto> result = mapper.listCommentsToListAdsCommentDto(LIST_COMMENTS);
+
+        assertEquals(AdsCommentDto.class, result.get(0).getClass());
     }
 }
