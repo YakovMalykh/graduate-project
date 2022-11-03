@@ -29,11 +29,12 @@ public class CommentServiceImpl implements CommentService {
         if (adsCommentDto != null) {
             Comment comment = commentMapper.adsCommentDtoToComment(adsCommentDto);
             comment.setId(adsPk.longValue());
-            commentRepository.save(comment);
-
-            return null;
+            Comment savedComment = commentRepository.save(comment);
+            log.info("new comment saved to DB! Id: " + savedComment.getId() + ", author: " +savedComment.getAuthor());
+            return ResponseEntity.ok(adsCommentDto);
         }
-        return null;
+        log.info("something wrong with saving");
+        return ResponseEntity.notFound().build();
     }
 
     /**
