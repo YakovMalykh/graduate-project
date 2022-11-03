@@ -17,15 +17,15 @@ public class Comment {
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
     @Column(name = "comment_id")
-    private Long id;//поле pk из AdsCommentDto похоже сюда нужно мапить, т.к. мы ПК объявления
-    // передаем в пути при создании комментария, зачем это делать, если бы он был в теле (в
-    // JSON)
+    private Long id;
 
-    @Column(name = "author_id")
-    private Long author;
+    @ManyToOne
+    @JoinColumn(name = "author_id")
+    private User author;
 
-    @Column(name = "ads_id")
-    private Long adsId;// откуда его брать???
+    @ManyToOne
+    @JoinColumn(name = "ads_id")
+    private Ads adsId;
 
     @Column(name = "comment_created")
     private LocalDateTime createdAt;

@@ -6,8 +6,8 @@ import java.time.LocalDateTime;
 
 @Data
 public class AdsCommentDto {
+    private Integer pk;
     private Integer author;
     private LocalDateTime createdAt;
-    private Integer pk;//это все же похоже на ID комментария...
     private String text;
 }
