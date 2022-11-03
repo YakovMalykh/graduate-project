@@ -1,9 +1,9 @@
 package ru.skypro.homework.models;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
-import org.hibernate.Hibernate;
 
 import javax.persistence.*;
+import java.util.Collection;
 import java.util.Objects;
 
 @Entity
@@ -31,9 +31,10 @@ public class Ads {
     @Column(name = "ads_price")
     private Double price;
 
- //   @JsonIgnore
-   // @OneToMany(mappedBy = "comments")
-   // private Collection<Comment> comments;
+    @JsonIgnore
+    @OneToMany(mappedBy = "adsId")
+    private Collection<Comment> comments;
+
 
     @Override
     public boolean equals(Object o) {

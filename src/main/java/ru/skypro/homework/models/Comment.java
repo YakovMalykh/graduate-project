@@ -16,19 +16,16 @@ import java.util.Objects;
 public class Comment {
     @Id
     @GeneratedValue (strategy = GenerationType.IDENTITY)
+    @Column(name = "comment_id")
     private Long id;
 
-    @Column(name = "author_id")//здесь тоже ссылка на User может быть нужна?
-    private Long author;
+    @ManyToOne
+    @JoinColumn(name = "author_id")
+    private User author;
 
-    // вероятно нужно так прописывать здесь поле, так в БД должен сохраниться Id
-    // обявления, в объявлении в свою очередь нкжно установить связь @OneToMany
-    // на поле List<Comment> comments
-//    @ManyToOne
-//    @Column(name = "ads_id")
-//    private Ads ads;
-    @Column(name = "ads_id")
-    private Long adsId;
+    @ManyToOne
+    @JoinColumn(name = "ads_id")
+    private Ads adsId;
 
     @Column(name = "comment_created")
     private LocalDateTime createdAt;

@@ -131,7 +131,7 @@ public class AdsController {
             @PathVariable Integer adsPk
     ) {
         log.info("метод доавления нового комментария");
-        return ResponseEntity.ok(new AdsCommentDto());
+        return ResponseEntity.ok(new AdsCommentDto());//здесь возвращать CreateAdsCommentDto?
     }
 
     @Operation(summary = "получаем список всех комментариев у данного обяъвления",
