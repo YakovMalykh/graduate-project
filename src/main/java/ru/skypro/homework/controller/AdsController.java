@@ -11,6 +11,7 @@ import net.bytebuddy.implementation.bind.annotation.Empty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.*;
+import ru.skypro.homework.service.AdsService;
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
@@ -18,21 +19,24 @@ import ru.skypro.homework.dto.*;
 @RequestMapping("/ads")
 @RequiredArgsConstructor
 public class AdsController {
- 
+    private final AdsService adsService;
+//public AdsController (AdsService adsService){this.adsService=adsService;}
+
     @Operation(summary = "добавляем новое объявление",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK",
-                            content = @Content(schema = @Schema(implementation = AdsDto.class))),
+                            content = @Content(schema = @Schema(implementation = CreateAdsDto.class))),
                     @ApiResponse(responseCode = "401", description = "Unauthorized"),
                     @ApiResponse(responseCode = "403", description = "Forbidden"),
                     @ApiResponse(responseCode = "404", description = "Not Found")
             })
     @PostMapping("/")
-    public ResponseEntity<CreateAdsDto> addAds(
-            @Parameter(description = "передаем заполненное объявление") @RequestBody AdsDto adsDto
+    public ResponseEntity<AdsDto> addAds(
+            @Parameter(description = "передаем заполненное объявление") @RequestBody CreateAdsDto createAdsDto
     ) {
+        adsService.addAdsToDb(createAdsDto);
         log.info("метод добавления нового объявления");
-        return ResponseEntity.ok(new CreateAdsDto());
+        return ResponseEntity.ok(new AdsDto());
     }
 
     @Operation(summary = "получаем список всех объявлений",
@@ -45,6 +49,7 @@ public class AdsController {
             })
     @GetMapping("/")
     public ResponseEntity<ResponseWrapperAdsDto> getAllAds() {
+        adsService.getAllAds();
         log.info("метод получения всех объявлений");
         return ResponseEntity.ok(new ResponseWrapperAdsDto());
     }
@@ -60,6 +65,7 @@ public class AdsController {
     @GetMapping("/{id}")
     public ResponseEntity<FullAdsDto> getAds(
             @Parameter(description = "передаем ID объявления") @PathVariable Integer id) {
+        adsService.getAds(id);
         log.info("метод получения объявления по его id");
         return ResponseEntity.ok(new FullAdsDto());
     }
@@ -81,6 +87,7 @@ public class AdsController {
             @Parameter(description = "details") @RequestParam(required = false) Object details,
             @Parameter(description = "principal") @RequestParam(required = false) Object principal
     ) {
+
         log.info("метод получения всех объявлений данного пользователя");
         return ResponseEntity.ok(new ResponseWrapperAdsDto());
     }
@@ -111,6 +118,7 @@ public class AdsController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> removeAds(
             @Parameter(description = "передаем ID объявления") @PathVariable Integer id) {
+        adsService.deleteAds(Long.valueOf(id));
         log.info("метод удаления объявления");
         return ResponseEntity.status(204).build();
     }
