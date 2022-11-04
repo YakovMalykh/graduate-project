@@ -11,6 +11,8 @@ import ru.skypro.homework.repositories.CommentRepository;
 import ru.skypro.homework.service.CommentService;
 
 import javax.transaction.Transactional;
+import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -28,9 +30,9 @@ public class CommentServiceImpl implements CommentService {
     public ResponseEntity<AdsCommentDto> addCommentToDb(Integer adsPk, AdsCommentDto adsCommentDto) {
         if (adsCommentDto != null) {
             Comment comment = commentMapper.adsCommentDtoToComment(adsCommentDto);
-            comment.setId(adsPk.longValue());
+//            comment.setAdsId(); здесь нужно идти в AdsRepository и полученный Ads прописать в коммент
             Comment savedComment = commentRepository.save(comment);
-            log.info("new comment saved to DB! Id: " + savedComment.getId() + ", author: " +savedComment.getAuthor());
+            log.info("new comment saved to DB! Id: " + savedComment.getId() + ", author: " + savedComment.getAuthor());
             return ResponseEntity.ok(adsCommentDto);
         }
         log.info("something wrong with saving");
@@ -42,12 +44,29 @@ public class CommentServiceImpl implements CommentService {
      */
     @Override
     public ResponseEntity<ResponseWrapperAdsCommentDto> getAllComments(Integer adsPk) {
-        return null;
+        List<Comment> commentList = commentRepository.findAllByAdsId(adsPk.longValue());
+        if (!commentList.isEmpty()) {
+            List<AdsCommentDto> adsCommentDtoList = commentMapper.listCommentsToListAdsCommentDto(commentList);
+
+            ResponseWrapperAdsCommentDto responseWrapperAdsCommentDto = new ResponseWrapperAdsCommentDto();
+
+            responseWrapperAdsCommentDto.setCount(adsCommentDtoList.size());
+            responseWrapperAdsCommentDto.setResult(adsCommentDtoList);
+
+            return ResponseEntity.ok(responseWrapperAdsCommentDto);
+        }
+        return ResponseEntity.notFound().build();
     }
 
     @Override
     public ResponseEntity<AdsCommentDto> getAdsComment(Integer adsPk, Integer id) {
-        return null;
+        Optional<Comment> optionalComment = commentRepository.findById(id.longValue());
+        if (optionalComment.isPresent()) {
+            AdsCommentDto adsCommentDto = commentMapper.commentToAdsCommentDto(optionalComment.get());
+            return ResponseEntity.ok(adsCommentDto);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @Override
