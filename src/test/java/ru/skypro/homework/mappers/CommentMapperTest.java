@@ -59,7 +59,7 @@ class CommentMapperTest {
         Comment comment = mapper.adsCommentDtoToComment(ADS_COMMENT_DTO);
 
         assertEquals(1L, comment.getId());
-//        assertEquals(1, comment.getAuthor());//сначала нужно прописать логику в маппере по обращению к нужному репозиторию
+//        assertEquals(1, comment.getAuthor());//сначала нужно прописать логику в маппере по обращению к UserRepository
         assertEquals(PARSE_DATE, comment.getCreatedAt());
         assertEquals("text", comment.getText());
 
@@ -83,5 +83,19 @@ class CommentMapperTest {
         List<AdsCommentDto> result = mapper.listCommentsToListAdsCommentDto(LIST_COMMENTS);
 
         assertEquals(AdsCommentDto.class, result.get(0).getClass());
+    }
+
+    @Test
+    void updateCommentFromAdsCommentDto() {
+        ADS_COMMENT_DTO.setAuthor(null);
+        ADS_COMMENT_DTO.setCreatedAt(null);
+        ADS_COMMENT_DTO.setText("checking patch method");
+
+        mapper.updateCommentFromAdsCommentDto(ADS_COMMENT_DTO, TEST_COMMENT_2);
+
+        assertEquals(1,TEST_COMMENT_2.getId());
+        assertEquals(AUTHOR_2,TEST_COMMENT_2.getAuthor());
+        assertEquals(PARSE_DATE, TEST_COMMENT_2.getCreatedAt());
+        assertEquals("checking patch method",TEST_COMMENT_2.getText());
     }
 }

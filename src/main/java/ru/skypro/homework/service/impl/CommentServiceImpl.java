@@ -6,7 +6,9 @@ import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.AdsCommentDto;
 import ru.skypro.homework.dto.ResponseWrapperAdsCommentDto;
 import ru.skypro.homework.mappers.CommentMapper;
+import ru.skypro.homework.models.Ads;
 import ru.skypro.homework.models.Comment;
+import ru.skypro.homework.repositories.AdsRepository;
 import ru.skypro.homework.repositories.CommentRepository;
 import ru.skypro.homework.service.CommentService;
 
@@ -20,17 +22,21 @@ import java.util.Optional;
 public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final CommentMapper commentMapper;
+    private final AdsRepository adsRepository;
 
-    public CommentServiceImpl(CommentRepository commentRepository, CommentMapper commentMapper) {
+    public CommentServiceImpl(CommentRepository commentRepository, CommentMapper commentMapper, AdsRepository adsRepository) {
         this.commentRepository = commentRepository;
         this.commentMapper = commentMapper;
+        this.adsRepository = adsRepository;
     }
 
     @Override
     public ResponseEntity<AdsCommentDto> addCommentToDb(Integer adsPk, AdsCommentDto adsCommentDto) {
-        if (adsCommentDto != null) {
+        Optional<Ads> adsOptional = adsRepository.findById(adsPk.longValue());
+        if (adsOptional.isPresent() && adsCommentDto != null) {
             Comment comment = commentMapper.adsCommentDtoToComment(adsCommentDto);
-//            comment.setAdsId(); здесь нужно идти в AdsRepository и полученный Ads прописать в коммент
+            Ads ads = adsOptional.get();
+            comment.setAdsId(ads);
             Comment savedComment = commentRepository.save(comment);
             log.info("new comment saved to DB! Id: " + savedComment.getId() + ", author: " + savedComment.getAuthor());
             return ResponseEntity.ok(adsCommentDto);
@@ -52,9 +58,10 @@ public class CommentServiceImpl implements CommentService {
 
             responseWrapperAdsCommentDto.setCount(adsCommentDtoList.size());
             responseWrapperAdsCommentDto.setResult(adsCommentDtoList);
-
+            log.info("list of comments had been converted into ResponseWrapperAdsCommentDTO");
             return ResponseEntity.ok(responseWrapperAdsCommentDto);
         }
+        log.info("Any comment doesn't exist");
         return ResponseEntity.notFound().build();
     }
 
@@ -63,8 +70,10 @@ public class CommentServiceImpl implements CommentService {
         Optional<Comment> optionalComment = commentRepository.findById(id.longValue());
         if (optionalComment.isPresent()) {
             AdsCommentDto adsCommentDto = commentMapper.commentToAdsCommentDto(optionalComment.get());
+            log.info("comment with id:" + id+ " had been retrieved and converted into AdsCommentDto");
             return ResponseEntity.ok(adsCommentDto);
         } else {
+            log.info("comment doesn't exist");
             return ResponseEntity.notFound().build();
         }
     }
@@ -76,6 +85,14 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public ResponseEntity<Void> deleteAdsComment(Integer adsPk, Integer id) {
+        Optional<Comment> commentOptional = commentRepository.findById(id.longValue());
+        if (commentOptional.isPresent()) {
+            log.info("comment id: " + id + "has been deleted");
+            commentRepository.delete(commentOptional.get());
+        } else {
+            log.info("comment doesn't exist");
+            return ResponseEntity.status(204).build();// if comment has been deleted already;}
+        }
         return null;
     }
 }
