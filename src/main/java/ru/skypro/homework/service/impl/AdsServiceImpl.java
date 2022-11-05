@@ -77,7 +77,7 @@ public class AdsServiceImpl implements AdsService {
         Optional<Ads> optionalAds = adsRepository.findById(adsPk.longValue());
 
         if (optionalAds.isPresent()) {
-            Optional<User> optionslUser = userRepository.findById(adsPk.longValue());
+            Optional<User> optionslUser = userRepository.findById(optionalAds.get().getAuthor().getId());
             FullAdsDto fullAdsDto = adsMapper.adsToFullAdsDto(optionalAds.get(), optionslUser.get());
             return ResponseEntity.ok(fullAdsDto);
         } else {
