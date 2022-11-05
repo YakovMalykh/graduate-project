@@ -1,8 +1,6 @@
 package ru.skypro.homework.mappers;
 
-import org.mapstruct.InjectionStrategy;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+import org.mapstruct.*;
 import ru.skypro.homework.dto.AdsCommentDto;
 import ru.skypro.homework.models.Comment;
 import ru.skypro.homework.models.User;
@@ -25,5 +23,8 @@ public interface CommentMapper {
         return new User();
     }
     List<AdsCommentDto> listCommentsToListAdsCommentDto(List<Comment> commentsList);
+    @Mapping(target = "id",source = "pk")// не знаю нужно ли это
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateCommentFromAdsCommentDto(AdsCommentDto adsCommentDto, @MappingTarget Comment comment);
 
 }
