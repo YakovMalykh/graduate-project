@@ -50,7 +50,7 @@ public class AdsServiceImpl implements AdsService {
 
     @Override
     public ResponseEntity<ResponseWrapperAdsDto> getAllAds() {
-        List<Ads> adsList = adsRepository.findAll();
+       List<Ads> adsList = adsRepository.findAll();
         if (!adsList.isEmpty()) {
             List<AdsDto> adsDtoList = adsMapper.listAdsToListAdsDto(adsList);
             ResponseWrapperAdsDto responseWrapperAdsDto = new ResponseWrapperAdsDto();
@@ -79,7 +79,6 @@ public class AdsServiceImpl implements AdsService {
         if (optionalAds.isPresent()) {
             Optional<User> optionslUser = userRepository.findById(adsPk.longValue());
             FullAdsDto fullAdsDto = adsMapper.adsToFullAdsDto(optionalAds.get(), optionslUser.get());
-
             return ResponseEntity.ok(fullAdsDto);
         } else {
             return ResponseEntity.notFound().build();
