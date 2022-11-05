@@ -23,7 +23,8 @@ public interface CommentMapper {
         return new User();
     }
     List<AdsCommentDto> listCommentsToListAdsCommentDto(List<Comment> commentsList);
-    @Mapping(target = "id",source = "pk")// не знаю нужно ли это
+
+    @Mapping(target = "id",source = "pk")// не знаю нужно ли это в данном случае
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateCommentFromAdsCommentDto(AdsCommentDto adsCommentDto, @MappingTarget Comment comment);
 

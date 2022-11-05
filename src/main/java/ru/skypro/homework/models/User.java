@@ -36,7 +36,7 @@ public class User {
     @Column(name = "user_password")
     private String password;
 
-    @Column(name = "user_role")
+    @Column(name = "user_role")// у нас есть Enam Role... здесь его надо использовать
     private String role;
 
     @Override
