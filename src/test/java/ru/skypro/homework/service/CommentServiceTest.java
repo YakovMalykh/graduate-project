@@ -79,7 +79,7 @@ class CommentServiceTest {
         assertEquals(ResponseEntity.notFound().build(), response);
     }
     @Test
-    void addCommentToDbFailedCouseAdsIdIsNull() {
+    void addCommentToDbFailedCauseAdsIdIsNull() {
         when(adsRepository.findById(anyLong())).thenReturn(Optional.empty());
         ResponseEntity<AdsCommentDto> response = commentService.addCommentToDb(1, ADS_COMMENT_DTO);
         assertEquals(ResponseEntity.notFound().build(), response);
@@ -98,7 +98,7 @@ class CommentServiceTest {
     }
 
     @Test
-    void getAllComments_whenCommetsListIsEmpty() {
+    void getAllComments_whenCommentsListIsEmpty() {
         when(commentRepository.findAllByAdsId(anyLong())).thenReturn(EMPTY_LIST_COMMENTS);
 
         ResponseEntity<ResponseWrapperAdsCommentDto> response = commentService.getAllComments(1);
@@ -128,7 +128,22 @@ class CommentServiceTest {
     }
 
     @Test
-    void updateAdsComment() {
+    void updateAdsComment_whenSuccess() {
+        when(adsRepository.findById(anyLong())).thenReturn(Optional.of(ADS));
+        when(commentRepository.findById(anyLong())).thenReturn(Optional.of(TEST_COMMENT_2));
+
+        ResponseEntity<AdsCommentDto> response = commentService.updateAdsComment(1, 1, ADS_COMMENT_DTO);
+
+        assertEquals(ResponseEntity.ok(ADS_COMMENT_DTO),response);
+    }
+    @Test
+    void updateAdsComment_whenFailed() {
+        when(adsRepository.findById(anyLong())).thenReturn(Optional.empty());
+        when(commentRepository.findById(anyLong())).thenReturn(Optional.of(TEST_COMMENT_2));
+
+        ResponseEntity<AdsCommentDto> response = commentService.updateAdsComment(1, 1, ADS_COMMENT_DTO);
+
+        assertEquals(ResponseEntity.status(204).build(),response);
     }
 
     @Test

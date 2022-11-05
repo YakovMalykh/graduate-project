@@ -70,7 +70,7 @@ public class CommentServiceImpl implements CommentService {
         Optional<Comment> optionalComment = commentRepository.findById(id.longValue());
         if (optionalComment.isPresent()) {
             AdsCommentDto adsCommentDto = commentMapper.commentToAdsCommentDto(optionalComment.get());
-            log.info("comment with id:" + id+ " had been retrieved and converted into AdsCommentDto");
+            log.info("comment with id:" + id + " had been retrieved and converted into AdsCommentDto");
             return ResponseEntity.ok(adsCommentDto);
         } else {
             log.info("comment doesn't exist");
@@ -80,7 +80,18 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public ResponseEntity<AdsCommentDto> updateAdsComment(Integer adsPk, Integer id, AdsCommentDto adsCommentDto) {
-        return null;
+        Optional<Ads> optionalAds = adsRepository.findById(adsPk.longValue());
+        Optional<Comment> optionalComment = commentRepository.findById(id.longValue());
+        if (optionalAds.isPresent() && optionalComment.isPresent()) {
+            Comment comment = optionalComment.get();
+            commentMapper.updateCommentFromAdsCommentDto(adsCommentDto, comment);
+            commentRepository.save(comment);
+            log.info("success, comment with id: " + id + "has been updated");
+            return ResponseEntity.ok(adsCommentDto);
+        } else {
+            log.info("Ads or Comment doesn't exists");
+            return ResponseEntity.status(204).build();
+        }
     }
 
     @Override
