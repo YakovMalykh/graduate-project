@@ -17,10 +17,10 @@ public class Ads {
     @GeneratedValue (strategy = GenerationType.IDENTITY)
     @Column(name = "ads_id")
     private Long id;
-  //  @ManyToOne
-  //  @JoinColumn(name = "user_id")
-    @Column(name = "author_id")
-    private Long author;
+
+    @ManyToOne
+    @JoinColumn(name = "author_id")
+    private User author;
 
     @Column(name = "ads_image")
     private String image;
@@ -29,7 +29,7 @@ public class Ads {
     @Column(name = "ads_description")
     private String description;
     @Column(name = "ads_price")
-    private Double price;
+    private Integer price;
 
     @JsonIgnore
     @OneToMany(mappedBy = "adsId")
