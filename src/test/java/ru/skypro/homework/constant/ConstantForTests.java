@@ -1,17 +1,16 @@
 package ru.skypro.homework.constant;
 
-import ru.skypro.homework.dto.AdsCommentDto;
-import ru.skypro.homework.dto.AdsDto;
-import ru.skypro.homework.dto.CreateAdsDto;
+import ru.skypro.homework.dto.*;
 import ru.skypro.homework.models.Ads;
 import ru.skypro.homework.models.Comment;
 import ru.skypro.homework.models.User;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+
+import static ru.skypro.homework.dto.Role.USER;
 
 public class ConstantForTests {
     public static final String DATE_FORMAT = "dd-MM-yyyy HH:mm:ss";
@@ -25,6 +24,9 @@ public class ConstantForTests {
     public static final String FIRST_NAME = "firstName";
     public static final String PHONE = "+79999999999";
     public static final String EMAIL = "user@mail.com";
+
+    public static final String PASSWORD = "password";
+    public static final Role ROLE = USER;
 
     public static final Ads TEST_ADS_1 = new Ads();
     public static final Ads TEST_ADS_2 = new Ads();
@@ -48,5 +50,14 @@ public class ConstantForTests {
     public static final AdsDto ADS_DTO = new AdsDto();
     public static final CreateAdsDto CREATE_ADS_DTO = new CreateAdsDto();
     public static final List<AdsCommentDto> LIST_ADS_COMMENT_DTO = new ArrayList<>();
+
+
+    public static final User USER_1 = new User();
+    public static final User USER_2 = new User();
+    public static final UserDto USER_DTO_1 = new UserDto();
+    public static final UserDto USER_DTO_2 = new UserDto();
+    public static final RegisterReqDto REGISTER_REQ_DTO = new RegisterReqDto();
+    public static final List<User> LIST_USER = new ArrayList<>();
+    public static final NewPasswordDto NEW_PASSWORD_DTO = new NewPasswordDto();
 
 }
