@@ -60,4 +60,6 @@ public class ConstantForTests {
     public static final List<User> LIST_USER = new ArrayList<>();
     public static final NewPasswordDto NEW_PASSWORD_DTO = new NewPasswordDto();
 
+    public static final List<UserDto> LIST_USER_DTO = new ArrayList<>();
+
 }

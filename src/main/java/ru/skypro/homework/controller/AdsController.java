@@ -24,9 +24,7 @@ import ru.skypro.homework.service.CommentService;
 @RequiredArgsConstructor
 public class AdsController {
     private final AdsService adsService;
-    private final AdsRepository adsRepository;
     private final CommentService commentService;
-    private final ObjectMapper mapper;
 
     @Operation(summary = "добавляем новое объявление",
             responses = {
@@ -40,9 +38,8 @@ public class AdsController {
     public ResponseEntity<AdsDto> addAds(
             @Parameter(description = "передаем заполненное объявление") @RequestBody CreateAdsDto createAdsDto
     ) {
-        adsService.addAdsToDb(createAdsDto);
         log.info("метод добавления нового объявления");
-        return ResponseEntity.ok(new AdsDto());
+        return adsService.addAdsToDb(createAdsDto);
     }
 
     @Operation(summary = "получаем список всех объявлений",
@@ -110,7 +107,7 @@ public class AdsController {
             @RequestBody AdsDto adsDto
     ) {
         log.info("метод обновления объявления");
-        return adsService.updateAds( id, adsDto);
+        return adsService.updateAds(id, adsDto);
     }
 
     @Operation(summary = "удаляем объявление (по его ID) ",
@@ -122,9 +119,9 @@ public class AdsController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> removeAds(
             @Parameter(description = "передаем ID объявления") @PathVariable Integer id) {
-        adsService.deleteAds(Long.valueOf(id));
+
         log.info("метод удаления объявления");
-        return ResponseEntity.status(204).build();
+        return adsService.deleteAds(Long.valueOf(id));
     }
 
     @Operation(summary = "доавляем новый комментарий к обявлению",
