@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.ResponseWrapperUserDto;
 import ru.skypro.homework.dto.UserDto;
+import ru.skypro.homework.service.UserService;
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
@@ -18,6 +19,8 @@ import ru.skypro.homework.dto.UserDto;
 @RequestMapping("/users")
 @RequiredArgsConstructor
 public class UserController {
+
+    private final UserService userService;
 
        @Operation(
             summary = "выводим всех пользователей",
@@ -32,7 +35,7 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<ResponseWrapperUserDto> getUsers() {
         log.info("метод вывода списка всех пользователей");
-        return ResponseEntity.ok(new ResponseWrapperUserDto());
+        return userService.getUsers();
     }
 
     @Operation(
@@ -48,7 +51,7 @@ public class UserController {
     @PatchMapping("/me")
     public ResponseEntity<UserDto> updateUser(@RequestBody UserDto userDto) {
         log.info("метод обновления существующего пользователя");
-        return ResponseEntity.ok(new UserDto());
+        return userService.updateUser(userDto);
     }
 
     @Operation(
@@ -62,9 +65,10 @@ public class UserController {
             }
     )
     @PostMapping("/set_password")
-    public ResponseEntity<NewPasswordDto> setPassword(@RequestBody NewPasswordDto currentPassword) {
+    public ResponseEntity<NewPasswordDto> setPassword(@RequestBody NewPasswordDto passwordDto) {
         log.info("метод установки пользователю нового пароля");
-        return ResponseEntity.ok(new NewPasswordDto());
+        // метод сервиса еще не дописан
+        return userService.setPassword(passwordDto);
     }
 
 
@@ -81,7 +85,7 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> getUser(@PathVariable Integer id) {
         log.info("метод получения пользователя по ID");
-        return ResponseEntity.ok(new UserDto());
+        return userService.getUser(id);
     }
 
 }
