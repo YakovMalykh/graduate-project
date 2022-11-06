@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import ru.skypro.homework.dto.Role;
 
 import javax.persistence.*;
 import java.util.Objects;
@@ -37,14 +38,14 @@ public class User {
     private String password;
 
     @Column(name = "user_role")// у нас есть Enam Role... здесь его надо использовать
-    private String role;
+    private Role role;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return Objects.equals(id, user.id) && Objects.equals(firstName, user.firstName) && Objects.equals(lastName, user.lastName) && Objects.equals(email, user.email) && Objects.equals(phone, user.phone) && Objects.equals(password, user.password) && Objects.equals(role, user.role);
+        return id.equals(user.id) && firstName.equals(user.firstName) && lastName.equals(user.lastName) && email.equals(user.email) && Objects.equals(phone, user.phone) && Objects.equals(password, user.password) && role == user.role;
     }
 
     @Override
