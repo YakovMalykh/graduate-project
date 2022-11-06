@@ -2,18 +2,30 @@ package ru.skypro.homework.mappers;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import ru.skypro.homework.dto.AdsCommentDto;
 import ru.skypro.homework.dto.AdsDto;
 import ru.skypro.homework.dto.FullAdsDto;
 import ru.skypro.homework.models.Ads;
 import ru.skypro.homework.models.Comment;
+import ru.skypro.homework.repositories.UserRepository;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.when;
 import static ru.skypro.homework.constant.ConstantForTests.*;
 import static ru.skypro.homework.constant.ConstantForTests.LIST_COMMENTS;
-
+@ExtendWith(MockitoExtension.class)
 public class AdsMapperTest {
+    @Mock
+    UserRepository userRepository;
+    @InjectMocks
     AdsMapper mapper = Mappers.getMapper(AdsMapper.class);
 
     @BeforeEach
@@ -89,6 +101,15 @@ public class AdsMapperTest {
         assertEquals(TITLE_2, fullAdsDto.getTitle());
         assertEquals(IMAGE_2, fullAdsDto.getImage());
     }
-
+    @Test
+    void updateAdsFromAdsDto() {
+        when(userRepository.findById(anyLong())).thenReturn(Optional.of(AUTHOR_2));
+        mapper.updateAdsFromAdsDto(ADS_DTO, TEST_ADS_2);
+        assertEquals(AUTHOR_2, TEST_ADS_2.getAuthor());
+        assertEquals(1, TEST_ADS_2.getId());
+        assertEquals(IMAGE, TEST_ADS_2.getImage());
+        assertEquals(TITLE, TEST_ADS_2.getTitle());
+        assertEquals(PRICE, TEST_ADS_2.getPrice());
+            }
 
 }

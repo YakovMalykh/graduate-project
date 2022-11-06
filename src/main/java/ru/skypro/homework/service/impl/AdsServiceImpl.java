@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.mappers.AdsMapper;
 import ru.skypro.homework.models.Ads;
+import ru.skypro.homework.models.Comment;
 import ru.skypro.homework.models.User;
 import ru.skypro.homework.repositories.AdsRepository;
 import ru.skypro.homework.repositories.UserRepository;
@@ -31,13 +32,10 @@ public class AdsServiceImpl implements AdsService {
     }
 
 
-    @Override
+    @Override //метод пока не отрабатывает, т.к. нет автора
     public ResponseEntity<AdsDto> addAdsToDb(CreateAdsDto createAdsDto) {
         if (createAdsDto != null) {
             Ads ads = adsMapper.createAdsDtoToAds(createAdsDto);
-        //    User user = new User();
-        //    user.setId(3L);
-           // ads.setAuthor(user);
             Ads savedAds = adsRepository.save(ads);
             AdsDto adsDto = adsMapper.adsToAdsDto(savedAds);
             log.info("new ad saved to DB! Id: " + ads.getId() + ", author: " + ads.getAuthor());
@@ -50,7 +48,7 @@ public class AdsServiceImpl implements AdsService {
 
     @Override
     public ResponseEntity<ResponseWrapperAdsDto> getAllAds() {
-       List<Ads> adsList = adsRepository.findAll();
+        List<Ads> adsList = adsRepository.findAll();
         if (!adsList.isEmpty()) {
             List<AdsDto> adsDtoList = adsMapper.listAdsToListAdsDto(adsList);
             ResponseWrapperAdsDto responseWrapperAdsDto = new ResponseWrapperAdsDto();
@@ -86,12 +84,34 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
-    public ResponseEntity<AdsDto> updateAds(Integer adsPk, Ads ads) {
-        return null;
+    public ResponseEntity<AdsDto> updateAds(Integer adsPk, AdsDto adsDto) {
+        System.out.println(adsDto.toString());
+        System.out.println(adsPk);
+       Optional<Ads> optionalAds = adsRepository.findById(adsPk.longValue());
+
+        if (optionalAds.isPresent()) {
+            Ads ads = optionalAds.get();
+            adsMapper.updateAdsFromAdsDto(adsDto, ads);
+            adsRepository.save(ads);
+            log.info("success, ads with id: " + adsPk + "has been updated");
+            return ResponseEntity.ok(adsDto);
+        } else {
+            log.info("Ads doesn't exists");
+            return ResponseEntity.status(204).build();
+        }
     }
 
     @Override
     public ResponseEntity<ResponseWrapperAdsDto> getAdsMe(Boolean authenticated, String authority, Object credentials, Object details, Object principal) {
-        return null;
+         List<Ads> adsList = adsRepository.findAllByAuthor_Id(3L); //потом заменим на автора из контекста
+        if (!adsList.isEmpty()) {
+            List<AdsDto> adsDtoList = adsMapper.listAdsToListAdsDto(adsList);
+            ResponseWrapperAdsDto responseWrapperAdsDto = new ResponseWrapperAdsDto();
+            responseWrapperAdsDto.setCount(adsDtoList.size());
+            responseWrapperAdsDto.setResult(adsDtoList);
+            return ResponseEntity.ok(responseWrapperAdsDto);
+        }
+        return ResponseEntity.notFound().build();
     }
-}
+    }
+
