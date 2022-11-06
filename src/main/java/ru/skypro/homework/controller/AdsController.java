@@ -9,16 +9,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.bytebuddy.implementation.bind.annotation.Empty;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.ServletServerHttpRequest;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.*;
-import ru.skypro.homework.models.Ads;
 import ru.skypro.homework.repositories.AdsRepository;
 import ru.skypro.homework.service.AdsService;
+import ru.skypro.homework.service.CommentService;
 
-import java.io.IOException;
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
@@ -28,7 +25,7 @@ import java.io.IOException;
 public class AdsController {
     private final AdsService adsService;
     private final AdsRepository adsRepository;
-
+    private final CommentService commentService;
     private final ObjectMapper mapper;
 
     @Operation(summary = "добавляем новое объявление",
@@ -145,8 +142,8 @@ public class AdsController {
             @Parameter(description = "передаем первичный ключ обявления")
             @PathVariable Integer adsPk
     ) {
-        log.info("метод доавления нового комментария");
-        return ResponseEntity.ok(new AdsCommentDto());//здесь возвращать CreateAdsCommentDto?
+
+        return commentService.addCommentToDb(adsPk, adsCommentDto);
     }
 
     @Operation(summary = "получаем список всех комментариев у данного обяъвления",
@@ -160,8 +157,7 @@ public class AdsController {
     public ResponseEntity<ResponseWrapperAdsCommentDto> getAdsComments(
             @Parameter(description = "передаем первичный ключ обявления")
             @PathVariable Integer adsPk) {
-        log.info("метод получения всех комментариев");
-        return ResponseEntity.ok(new ResponseWrapperAdsCommentDto());
+        return commentService.getAllComments(adsPk);
     }
 
     @Operation(summary = "получаем комментарий (по его ID) у данного обяъвления (по его первичному ключу)",
@@ -177,8 +173,7 @@ public class AdsController {
             @PathVariable Integer adsPk,
             @Parameter(description = "передаем ID комментария")
             @PathVariable Integer id) {
-        log.info("метод получения одного комментария");
-        return ResponseEntity.ok(new AdsCommentDto());
+        return commentService.getAdsComment(adsPk, id);
     }
 
     @Operation(summary = "удаляем комментарий (по его ID) у данного обяъвления (по его первичному ключу)",
@@ -193,8 +188,7 @@ public class AdsController {
             @PathVariable Integer adsPk,
             @Parameter(description = "передаем ID комментария")
             @PathVariable Integer id) {
-        log.info("метод удаления комментария");
-        return ResponseEntity.status(204).build();
+        return commentService.deleteAdsComment(adsPk, id);
     }
 
     @Operation(summary = "обновляем существующий комментарий",
@@ -209,7 +203,6 @@ public class AdsController {
             @PathVariable Integer id,
             @RequestBody AdsCommentDto adsCommentDto
     ) {
-        log.info("метод обновления комментария");
-        return ResponseEntity.ok(new AdsCommentDto());
+        return commentService.updateAdsComment(adsPk, id, adsCommentDto);
     }
 }
