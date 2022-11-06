@@ -110,7 +110,7 @@ public class AdsController {
             @RequestBody AdsDto adsDto
     ) {
         log.info("метод обновления объявления");
-        return ResponseEntity.ok(new AdsDto());
+        return adsService.updateAds( id, adsDto);
     }
 
     @Operation(summary = "удаляем объявление (по его ID) ",
