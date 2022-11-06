@@ -24,7 +24,7 @@ class UserMapperTest {
         USER_1.setEmail(EMAIL);
         USER_1.setPhone(PHONE);
         USER_1.setPassword(PASSWORD);
-        USER_1.setRole(ROLE.name());
+        USER_1.setRole(ROLE);
 
         USER_2.setId(2L);
 
@@ -77,7 +77,7 @@ class UserMapperTest {
         assertEquals(PHONE, user.getPhone());
         assertEquals(EMAIL, user.getEmail());
         assertEquals(PASSWORD, user.getPassword());
-        assertEquals(ROLE.name(), user.getRole());
+        assertEquals(ROLE, user.getRole());
     }
 
     @Test
@@ -102,7 +102,7 @@ class UserMapperTest {
         assertEquals(PHONE, USER_1.getPhone());
         assertEquals(EMAIL, USER_1.getEmail());
         assertEquals(PASSWORD, USER_1.getPassword());
-        assertEquals(ROLE.name(), USER_1.getRole());
+        assertEquals(ROLE, USER_1.getRole());
 
     }
 
@@ -120,7 +120,7 @@ class UserMapperTest {
         assertEquals(PHONE, USER_1.getPhone());
         assertEquals(EMAIL, USER_1.getEmail());
         assertEquals("123456", USER_1.getPassword());// обновляли только это поле
-        assertEquals(ROLE.name(), USER_1.getRole());
+        assertEquals(ROLE, USER_1.getRole());
 
     }
 }
