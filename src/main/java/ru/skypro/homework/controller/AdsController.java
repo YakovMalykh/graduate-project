@@ -1,5 +1,6 @@
 package ru.skypro.homework.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -11,6 +12,10 @@ import net.bytebuddy.implementation.bind.annotation.Empty;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.*;
+import ru.skypro.homework.repositories.AdsRepository;
+import ru.skypro.homework.service.AdsService;
+import ru.skypro.homework.service.CommentService;
+
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
@@ -18,21 +23,23 @@ import ru.skypro.homework.dto.*;
 @RequestMapping("/ads")
 @RequiredArgsConstructor
 public class AdsController {
+    private final AdsService adsService;
+    private final CommentService commentService;
 
     @Operation(summary = "добавляем новое объявление",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK",
-                            content = @Content(schema = @Schema(implementation = AdsDto.class))),
+                            content = @Content(schema = @Schema(implementation = CreateAdsDto.class))),
                     @ApiResponse(responseCode = "401", description = "Unauthorized"),
                     @ApiResponse(responseCode = "403", description = "Forbidden"),
                     @ApiResponse(responseCode = "404", description = "Not Found")
             })
     @PostMapping("/")
-    public ResponseEntity<CreateAdsDto> addAds(
-            @Parameter(description = "передаем заполненное объявление") @RequestBody AdsDto adsDto
+    public ResponseEntity<AdsDto> addAds(
+            @Parameter(description = "передаем заполненное объявление") @RequestBody CreateAdsDto createAdsDto
     ) {
         log.info("метод добавления нового объявления");
-        return ResponseEntity.ok(new CreateAdsDto());
+        return adsService.addAdsToDb(createAdsDto);
     }
 
     @Operation(summary = "получаем список всех объявлений",
@@ -46,7 +53,7 @@ public class AdsController {
     @GetMapping("/")
     public ResponseEntity<ResponseWrapperAdsDto> getAllAds() {
         log.info("метод получения всех объявлений");
-        return ResponseEntity.ok(new ResponseWrapperAdsDto());
+        return adsService.getAllAds();
     }
 
     @Operation(summary = "получаем объявление (по его ID) ",
@@ -61,7 +68,7 @@ public class AdsController {
     public ResponseEntity<FullAdsDto> getAds(
             @Parameter(description = "передаем ID объявления") @PathVariable Integer id) {
         log.info("метод получения объявления по его id");
-        return ResponseEntity.ok(new FullAdsDto());
+        return adsService.getAds(id);
     }
 
     @Operation(summary = "получаем объявления обращающегося пользователя",
@@ -81,6 +88,7 @@ public class AdsController {
             @Parameter(description = "details") @RequestParam(required = false) Object details,
             @Parameter(description = "principal") @RequestParam(required = false) Object principal
     ) {
+
         log.info("метод получения всех объявлений данного пользователя");
         return ResponseEntity.ok(new ResponseWrapperAdsDto());
     }
@@ -99,7 +107,7 @@ public class AdsController {
             @RequestBody AdsDto adsDto
     ) {
         log.info("метод обновления объявления");
-        return ResponseEntity.ok(new AdsDto());
+        return adsService.updateAds(id, adsDto);
     }
 
     @Operation(summary = "удаляем объявление (по его ID) ",
@@ -111,8 +119,9 @@ public class AdsController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> removeAds(
             @Parameter(description = "передаем ID объявления") @PathVariable Integer id) {
+
         log.info("метод удаления объявления");
-        return ResponseEntity.status(204).build();
+        return adsService.deleteAds(Long.valueOf(id));
     }
 
     @Operation(summary = "доавляем новый комментарий к обявлению",
@@ -130,8 +139,8 @@ public class AdsController {
             @Parameter(description = "передаем первичный ключ обявления")
             @PathVariable Integer adsPk
     ) {
-        log.info("метод доавления нового комментария");
-        return ResponseEntity.ok(new AdsCommentDto());
+
+        return commentService.addCommentToDb(adsPk, adsCommentDto);
     }
 
     @Operation(summary = "получаем список всех комментариев у данного обяъвления",
@@ -145,8 +154,7 @@ public class AdsController {
     public ResponseEntity<ResponseWrapperAdsCommentDto> getAdsComments(
             @Parameter(description = "передаем первичный ключ обявления")
             @PathVariable Integer adsPk) {
-        log.info("метод получения всех комментариев");
-        return ResponseEntity.ok(new ResponseWrapperAdsCommentDto());
+        return commentService.getAllComments(adsPk);
     }
 
     @Operation(summary = "получаем комментарий (по его ID) у данного обяъвления (по его первичному ключу)",
@@ -162,8 +170,7 @@ public class AdsController {
             @PathVariable Integer adsPk,
             @Parameter(description = "передаем ID комментария")
             @PathVariable Integer id) {
-        log.info("метод получения одного комментария");
-        return ResponseEntity.ok(new AdsCommentDto());
+        return commentService.getAdsComment(adsPk, id);
     }
 
     @Operation(summary = "удаляем комментарий (по его ID) у данного обяъвления (по его первичному ключу)",
@@ -178,8 +185,7 @@ public class AdsController {
             @PathVariable Integer adsPk,
             @Parameter(description = "передаем ID комментария")
             @PathVariable Integer id) {
-        log.info("метод удаления комментария");
-        return ResponseEntity.status(204).build();
+        return commentService.deleteAdsComment(adsPk, id);
     }
 
     @Operation(summary = "обновляем существующий комментарий",
@@ -194,7 +200,6 @@ public class AdsController {
             @PathVariable Integer id,
             @RequestBody AdsCommentDto adsCommentDto
     ) {
-        log.info("метод обновления комментария");
-        return ResponseEntity.ok(new AdsCommentDto());
+        return commentService.updateAdsComment(adsPk, id, adsCommentDto);
     }
 }
