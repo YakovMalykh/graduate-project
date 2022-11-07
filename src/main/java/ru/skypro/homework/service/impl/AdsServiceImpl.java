@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.mappers.AdsMapper;
 import ru.skypro.homework.models.Ads;
-import ru.skypro.homework.models.Comment;
 import ru.skypro.homework.models.User;
 import ru.skypro.homework.repositories.AdsRepository;
 import ru.skypro.homework.repositories.UserRepository;
@@ -87,7 +86,7 @@ public class AdsServiceImpl implements AdsService {
     public ResponseEntity<AdsDto> updateAds(Integer adsPk, AdsDto adsDto) {
         System.out.println(adsDto.toString());
         System.out.println(adsPk);
-       Optional<Ads> optionalAds = adsRepository.findById(adsPk.longValue());
+        Optional<Ads> optionalAds = adsRepository.findById(adsPk.longValue());
 
         if (optionalAds.isPresent()) {
             Ads ads = optionalAds.get();
@@ -103,7 +102,7 @@ public class AdsServiceImpl implements AdsService {
 
     @Override
     public ResponseEntity<ResponseWrapperAdsDto> getAdsMe(Boolean authenticated, String authority, Object credentials, Object details, Object principal) {
-         List<Ads> adsList = adsRepository.findAllByAuthor_Id(3L); //потом заменим на автора из контекста
+        List<Ads> adsList = adsRepository.findAllByAuthor_Id(3L); //потом заменим на автора из контекста
         if (!adsList.isEmpty()) {
             List<AdsDto> adsDtoList = adsMapper.listAdsToListAdsDto(adsList);
             ResponseWrapperAdsDto responseWrapperAdsDto = new ResponseWrapperAdsDto();
@@ -113,5 +112,24 @@ public class AdsServiceImpl implements AdsService {
         }
         return ResponseEntity.notFound().build();
     }
+
+    /**
+     * метод ищет обявления по частичному совпадению заголовка(tittle) и возвращает отсротированный по цене список
+     * @param tittle часть заоголовка
+     * @return
+     */
+    @Override
+    public ResponseEntity<ResponseWrapperAdsDto> getAdsByTittle(String tittle) {
+        List<Ads> adsList = adsRepository.findByTitleContainingIgnoreCaseOrderByPrice(tittle);
+        if (!adsList.isEmpty()) {
+            List<AdsDto> adsDtoList = adsMapper.listAdsToListAdsDto(adsList);
+            ResponseWrapperAdsDto responseWrapperAdsDto = new ResponseWrapperAdsDto();
+            responseWrapperAdsDto.setCount(adsDtoList.size());
+            responseWrapperAdsDto.setResult(adsDtoList);
+            return ResponseEntity.ok(responseWrapperAdsDto);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
+}
 
