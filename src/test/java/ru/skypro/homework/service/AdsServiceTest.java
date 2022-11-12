@@ -17,6 +17,7 @@ import ru.skypro.homework.models.Comment;
 import ru.skypro.homework.repositories.AdsRepository;
 import ru.skypro.homework.service.impl.AdsServiceImpl;
 
+import javax.validation.constraints.Null;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -48,22 +49,25 @@ public class AdsServiceTest {
         AUTHOR_2.setFirstName(FIRST_NAME);
 
 
-        CREATE_ADS_DTO.setPk(1);
-        CREATE_ADS_DTO.setImage(IMAGE);
+        IMAGE.setFilePath(IMAGE_STR);
+        LIST_IMAGES.add(IMAGE);
+
+     //   CREATE_ADS_DTO.setPk(1);
+     //   CREATE_ADS_DTO.setImage(IMAGE_STR);
         CREATE_ADS_DTO.setTitle(TITLE);
         CREATE_ADS_DTO.setDescription(DESCRIPTION);
         CREATE_ADS_DTO.setPrice(PRICE);
 
         ADS_DTO.setPk(1);
         ADS_DTO.setAuthor(2);
-        ADS_DTO.setImage(IMAGE);
+        ADS_DTO.setImage(IMAGE_STR);
         ADS_DTO.setTitle(TITLE);
         ADS_DTO.setPrice(PRICE);
 
 
         TEST_ADS_2.setId(2L);
         TEST_ADS_2.setAuthor(AUTHOR_2);
-        TEST_ADS_2.setImage(IMAGE_2);
+        TEST_ADS_2.setImages(LIST_IMAGES);
         TEST_ADS_2.setTitle(TITLE_2);
         TEST_ADS_2.setDescription(DESCRIPTION_2);
         TEST_ADS_2.setPrice(PRICE_2);
@@ -76,13 +80,13 @@ public class AdsServiceTest {
     void addToDbSuccessful() {
         when(adsMapper.createAdsDtoToAds(any(CreateAdsDto.class))).thenReturn(TEST_ADS_2);
         when(adsRepository.save(any(Ads.class))).thenReturn(TEST_ADS_2);
-        ResponseEntity<AdsDto> response = adsService.addAdsToDb( CREATE_ADS_DTO);
+        ResponseEntity<AdsDto> response = adsService.addAdsToDb( CREATE_ADS_DTO, LIST_IMAGES);
         assertNotNull(response);
     }
 
     @Test
     void addToDbFailed() {
-        ResponseEntity<AdsDto> response = adsService.addAdsToDb( null);
+        ResponseEntity<AdsDto> response = adsService.addAdsToDb( null, null);
         assertEquals(ResponseEntity.notFound().build(), response);
     }
 

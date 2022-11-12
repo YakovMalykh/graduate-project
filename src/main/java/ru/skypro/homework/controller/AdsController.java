@@ -9,12 +9,18 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.bytebuddy.implementation.bind.annotation.Empty;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
+import ru.skypro.homework.models.Image;
 import ru.skypro.homework.repositories.AdsRepository;
 import ru.skypro.homework.service.AdsService;
 import ru.skypro.homework.service.CommentService;
+
+import java.io.IOException;
+import java.util.List;
 
 
 @Slf4j
@@ -34,12 +40,13 @@ public class AdsController {
                     @ApiResponse(responseCode = "403", description = "Forbidden"),
                     @ApiResponse(responseCode = "404", description = "Not Found")
             })
-    @PostMapping("/")
+    @PostMapping(value="/", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<AdsDto> addAds(
-            @Parameter(description = "передаем заполненное объявление") @RequestBody CreateAdsDto createAdsDto
-    ) {
+            @Parameter(description = "передаем заполненное объявление") @RequestPart ("properties") CreateAdsDto createAdsDto, @RequestPart ("image") MultipartFile imageList
+    ) throws IOException {
         log.info("метод добавления нового объявления");
-        return adsService.addAdsToDb(createAdsDto);
+       // createAdsDto.setImage(imageList.get(0).getFilePath());
+        return adsService.addAdsToDb(createAdsDto, imageList);
     }
 
     @Operation(summary = "получаем список всех объявлений",

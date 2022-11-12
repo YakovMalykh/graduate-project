@@ -6,7 +6,9 @@ import ru.skypro.homework.dto.AdsDto;
 import ru.skypro.homework.dto.CreateAdsDto;
 import ru.skypro.homework.dto.FullAdsDto;
 import ru.skypro.homework.models.Ads;
+import ru.skypro.homework.models.Image;
 import ru.skypro.homework.models.User;
+import ru.skypro.homework.repositories.ImageRepository;
 import ru.skypro.homework.repositories.UserRepository;
 
 import java.util.List;
@@ -16,7 +18,8 @@ import java.util.Optional;
 public abstract class AdsMapper {
     @Autowired
     protected UserRepository userRepository;
-
+    @Autowired
+    protected ImageRepository imageRepository;
     @Mapping(target = "pk", source = "id")
     public abstract AdsDto adsToAdsDto(Ads ads);
 
@@ -24,19 +27,25 @@ public abstract class AdsMapper {
         return Math.toIntExact(author.getId());
     }
 
+    public String imageToString (Image image)
+    {
+        String imageStr= image.getFilePath();
+        return imageStr;
+    }
     @Mapping(target = "id", source = "pk")
     public abstract Ads adsDtoToAds(AdsDto adsDto);
 
     public User integerToUser(Integer authorId) {
-        // не знаю стоит ли проверять на Null возвращаемое значение, т.к. по логике не могу
-        // представить ситуации, когда у объявления нет автора и его нет в БД
-        //например сбой программы или там автора забанили или случайно удалили,А обновление осталось, поидеи надо перестраховаться
-        // может сделать какого ниь автора Неизвестин и возвращать его в таких случаях?
-        User user = userRepository.findById(authorId.longValue()).get();
+          User user = userRepository.findById(authorId.longValue()).get();
         return user;
     }
 
-    @Mapping(target = "id", source = "pk")
+    public Image stringToImage (String imageStr) { //не понятно, как тут все таки надо возвращать
+        Image image=new Image();
+        image.setFilePath(imageStr);
+        return image;
+    }
+   // @Mapping(target = "id", source = "pk")
     public abstract Ads createAdsDtoToAds(CreateAdsDto createAdsDto);
 
     @Mapping(target = "pk", source = "ads.id")

@@ -1,8 +1,10 @@
 package ru.skypro.homework.constant;
 
+
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.models.Ads;
 import ru.skypro.homework.models.Comment;
+import ru.skypro.homework.models.Image;
 import ru.skypro.homework.models.User;
 
 import java.time.LocalDateTime;
@@ -42,8 +44,13 @@ public class ConstantForTests {
     public static final String DESCRIPTION= "description";
     public static final String DESCRIPTION_2= "description 2";
 
-    public static final String IMAGE="image";
-    public static final String IMAGE_2="image2";
+    public static final String IMAGE_STR="image_str";
+    public static final String IMAGE_2_STR="image2_str";
+
+    public static final Image IMAGE=new Image();
+    public static final List<Image> LIST_IMAGES= new ArrayList<>();
+
+
     public static final List<Comment> LIST_COMMENTS = new ArrayList<>();
     public static final List<Comment> EMPTY_LIST_COMMENTS = new ArrayList<>();
     public static final AdsCommentDto ADS_COMMENT_DTO = new AdsCommentDto();
