@@ -50,12 +50,10 @@ public class AdsServiceImpl implements AdsService {
     @Override //метод пока не отрабатывает, т.к. нет автора
     public ResponseEntity<AdsDto> addAdsToDb(CreateAdsDto createAdsDto, MultipartFile file) throws IOException{
         if (createAdsDto != null) {
+           Ads savedAds = adsRepository.save(adsMapper.createAdsDtoToAds(createAdsDto));
+           AdsDto adsDto = adsMapper.adsToAdsDto(savedAds);
 
-            Ads ads = adsMapper.createAdsDtoToAds(createAdsDto);
-            Ads savedAds = adsRepository.save(ads);
-            AdsDto adsDto = adsMapper.adsToAdsDto(savedAds);
-          Optional< Ads> adsSaved= Optional.of(adsRepository.findById(Long.valueOf(adsDto.getPk())).orElse(new Ads()));
-            Path filePath = Path.of(imageDir, adsSaved.get().getId()+ "." + getExtensions(file.getOriginalFilename()));
+            Path filePath = Path.of(imageDir, savedAds.getId()+ "." + getExtensions(file.getOriginalFilename()));
             Files.createDirectories(filePath.getParent());
             Files.deleteIfExists(filePath);
             try (
@@ -66,8 +64,8 @@ public class AdsServiceImpl implements AdsService {
             ) {
                 bis.transferTo(bos);
             }
-           //Avatar avatar = avatarRepository.findByStudentId(studentId).orElse(new Avatar());
             Image image=new Image();
+            image.setAds(savedAds);
             image.setFilePath(filePath.toString());
             image.setFileSize(file.getSize());
             image.setMediaType(file.getContentType());
@@ -75,7 +73,7 @@ public class AdsServiceImpl implements AdsService {
             image.setPrewiew(generatePreview(filePath));
             imageRepository.save(image);
 
-            log.info("new ad saved to DB! Id: " + adsSaved.get().getId() + ", author: " + adsSaved.get().getAuthor());
+            log.info("new ad saved to DB! Id: " + savedAds.getId() + ", author: " + savedAds.getAuthor());
             return ResponseEntity.ok(adsDto);
         }
         log.info("something wrong with saving");
@@ -142,9 +140,7 @@ public class AdsServiceImpl implements AdsService {
 
     @Override
     public ResponseEntity<AdsDto> updateAds(Integer adsPk, AdsDto adsDto) {
-        System.out.println(adsDto.toString());
-        System.out.println(adsPk);
-        Optional<Ads> optionalAds = adsRepository.findById(adsPk.longValue());
+          Optional<Ads> optionalAds = adsRepository.findById(adsPk.longValue());
 
         if (optionalAds.isPresent()) {
             Ads ads = optionalAds.get();

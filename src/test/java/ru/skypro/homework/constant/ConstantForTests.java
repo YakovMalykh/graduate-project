@@ -49,7 +49,8 @@ public class ConstantForTests {
 
     public static final Image IMAGE=new Image();
     public static final List<Image> LIST_IMAGES= new ArrayList<>();
-
+    public static final List<Ads> LIST_ADS= new ArrayList<>();
+    public static final List<AdsDto>LIST_ADS_DTO=new ArrayList<>();
 
     public static final List<Comment> LIST_COMMENTS = new ArrayList<>();
     public static final List<Comment> EMPTY_LIST_COMMENTS = new ArrayList<>();
