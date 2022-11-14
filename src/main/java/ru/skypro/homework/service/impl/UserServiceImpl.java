@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.NewPasswordDto;
+import ru.skypro.homework.dto.RegisterReqDto;
 import ru.skypro.homework.dto.ResponseWrapperUserDto;
 import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.mappers.UserMapper;
@@ -36,7 +37,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> userByEmail = userRepository.getUserByEmail(username);
+        Optional<User> userByEmail = userRepository.getUserByEmailIgnoreCase(username);
         if (!userByEmail.isPresent()) {
             throw new UsernameNotFoundException(String.format("User '%s' not found", username));
         }
@@ -44,9 +45,9 @@ public class UserServiceImpl implements UserService {
         return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), getAuthority(user));
     }
 
+
     /**
      * из коллекции ролей получить коллекцию GrantedAuthority
-     *
      */
     private Collection<? extends GrantedAuthority> getAuthority(User user) {
         // т.к. у нас только по одной роли у каждого юзера, пока метод выглядит так
@@ -54,6 +55,15 @@ public class UserServiceImpl implements UserService {
         roles.add(new SimpleGrantedAuthority(user.getRole()));
         return roles;
     }
+
+    @Override
+    public boolean createUser(RegisterReqDto registerReqDto) {
+        User user = userMapper.registerReqDtoToUser(registerReqDto);
+        userRepository.save(user);
+        log.info("user with username: "+registerReqDto.getUsername()+" is saved");
+        return true;
+    }
+
 
     @Override
     public ResponseEntity<ResponseWrapperUserDto> getUsers() {
@@ -86,7 +96,6 @@ public class UserServiceImpl implements UserService {
 
     /**
      * метод не дописан
-     *
      */
     @Override
     public ResponseEntity<NewPasswordDto> setPassword(NewPasswordDto passwordDto) {
@@ -115,6 +124,11 @@ public class UserServiceImpl implements UserService {
             log.info("user with id: " + id + " doesn't exist");
             return ResponseEntity.notFound().build();
         }
+    }
+
+    @Override
+    public Optional<User> userExists(String username) {
+        return userRepository.getUserByEmailIgnoreCase(username);
     }
 
 
