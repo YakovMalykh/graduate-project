@@ -20,7 +20,7 @@ import static ru.skypro.homework.dto.Role.USER;
 @RestController
 @RequiredArgsConstructor
 public class AuthController {
-        private final AuthService authService;
+    private final AuthService authService;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginReqDto req) {

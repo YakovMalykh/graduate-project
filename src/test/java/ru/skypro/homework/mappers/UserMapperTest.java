@@ -3,6 +3,7 @@ package ru.skypro.homework.mappers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mapstruct.factory.Mappers;
+import ru.skypro.homework.dto.Role;
 import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.models.User;
 
@@ -24,7 +25,7 @@ class UserMapperTest {
         USER_1.setEmail(EMAIL);
         USER_1.setPhone(PHONE);
         USER_1.setPassword(PASSWORD);
-        USER_1.setRole(ROLE);
+        USER_1.setRole(ROLE.name());
 
         USER_2.setId(2L);
 
@@ -77,7 +78,7 @@ class UserMapperTest {
         assertEquals(PHONE, user.getPhone());
         assertEquals(EMAIL, user.getEmail());
         assertEquals(PASSWORD, user.getPassword());
-        assertEquals(ROLE, user.getRole());
+        assertEquals(ROLE, Role.valueOf(user.getRole()));
     }
 
     @Test
@@ -102,7 +103,7 @@ class UserMapperTest {
         assertEquals(PHONE, USER_1.getPhone());
         assertEquals(EMAIL, USER_1.getEmail());
         assertEquals(PASSWORD, USER_1.getPassword());
-        assertEquals(ROLE, USER_1.getRole());
+        assertEquals(ROLE, Role.valueOf(USER_1.getRole()));
 
     }
 
@@ -120,7 +121,7 @@ class UserMapperTest {
         assertEquals(PHONE, USER_1.getPhone());
         assertEquals(EMAIL, USER_1.getEmail());
         assertEquals("123456", USER_1.getPassword());// обновляли только это поле
-        assertEquals(ROLE, USER_1.getRole());
+        assertEquals(ROLE, Role.valueOf(USER_1.getRole()));
 
     }
 }

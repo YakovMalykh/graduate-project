@@ -2,8 +2,13 @@ package ru.skypro.homework.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.NewPasswordDto;
+import ru.skypro.homework.dto.RegisterReqDto;
 import ru.skypro.homework.dto.ResponseWrapperUserDto;
 import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.mappers.UserMapper;
@@ -12,6 +17,8 @@ import ru.skypro.homework.repositories.UserRepository;
 import ru.skypro.homework.service.UserService;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,6 +34,36 @@ public class UserServiceImpl implements UserService {
         this.userMapper = userMapper;
         this.userRepository = userRepository;
     }
+
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Optional<User> userByEmail = userRepository.getUserByEmailIgnoreCase(username);
+        if (!userByEmail.isPresent()) {
+            throw new UsernameNotFoundException(String.format("User '%s' not found", username));
+        }
+        User user = userByEmail.get();
+        return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), getAuthority(user));
+    }
+
+
+    /**
+     * из коллекции ролей получить коллекцию GrantedAuthority
+     */
+    private Collection<? extends GrantedAuthority> getAuthority(User user) {
+        // т.к. у нас только по одной роли у каждого юзера, пока метод выглядит так
+        Collection<GrantedAuthority> roles = new ArrayList<>();
+        roles.add(new SimpleGrantedAuthority(user.getRole()));
+        return roles;
+    }
+
+    @Override
+    public boolean createUser(RegisterReqDto registerReqDto) {
+        User user = userMapper.registerReqDtoToUser(registerReqDto);
+        userRepository.save(user);
+        log.info("user with username: "+registerReqDto.getUsername()+" is saved");
+        return true;
+    }
+
 
     @Override
     public ResponseEntity<ResponseWrapperUserDto> getUsers() {
@@ -59,7 +96,6 @@ public class UserServiceImpl implements UserService {
 
     /**
      * метод не дописан
-     *
      */
     @Override
     public ResponseEntity<NewPasswordDto> setPassword(NewPasswordDto passwordDto) {
@@ -89,4 +125,11 @@ public class UserServiceImpl implements UserService {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @Override
+    public Optional<User> userExists(String username) {
+        return userRepository.getUserByEmailIgnoreCase(username);
+    }
+
+
 }
