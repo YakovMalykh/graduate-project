@@ -3,6 +3,7 @@ package ru.skypro.homework;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
@@ -14,6 +15,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
 public class WebSecurityConfig {
 
     private final UserService userService;
@@ -59,7 +61,8 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests((authz) ->
                         authz
                                 .mvcMatchers(AUTH_WHITELIST).permitAll()
-                                .mvcMatchers("/ads/**", "/users/**").authenticated()
+                                .antMatchers("/ads").permitAll()// здесь точное совпадение
+                                .mvcMatchers("/ads/**", "/users/**").authenticated()//здесь более широкий охват вариантов URL
                 )
                 .cors().disable()
                 .httpBasic(withDefaults());

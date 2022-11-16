@@ -55,14 +55,13 @@ public class AdsServiceImpl implements AdsService {
         this.adsMapper = adsMapper;
     }
 
-
     @Override
     public ResponseEntity<AdsDto> addAdsToDb(CreateAdsDto createAdsDto, MultipartFile file) throws IOException {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         log.info("метод addAdsToD");
         if (createAdsDto != null) {
-            User user = userRepository.findById(4l).orElseThrow();
+           User user = userRepository.getUserByEmailIgnoreCase(auth.getName()).orElseThrow();
             List<Image> images = new ArrayList<>();
             images.add(adsMapper.imageToFile(file));
             Ads ads = adsMapper.createAdsDtoUserImageToAds(createAdsDto, user, images);
@@ -70,7 +69,6 @@ public class AdsServiceImpl implements AdsService {
             log.info(savedAds.toString());
             AdsDto adsDto = adsMapper.adsToAdsDto(savedAds);
             log.info(adsDto.toString());
-
             Path filePath = Path.of(imageDir, savedAds.getId() + "." + getExtensions(file.getOriginalFilename()));
             Files.createDirectories(filePath.getParent());
             Files.deleteIfExists(filePath);
@@ -78,11 +76,10 @@ public class AdsServiceImpl implements AdsService {
                     InputStream is = file.getInputStream();
                     OutputStream os = Files.newOutputStream(filePath, CREATE_NEW);
                     BufferedInputStream bis = new BufferedInputStream(is, 1024);
-                    BufferedOutputStream bos = new BufferedOutputStream(os, 1024);
+                    BufferedOutputStream bos = new BufferedOutputStream(os, 1024)
             ) {
                 bis.transferTo(bos);
             }
-
 
             Image image = new Image();
             image.setAds(savedAds);
@@ -124,6 +121,7 @@ public class AdsServiceImpl implements AdsService {
 
     @Override
     public ResponseEntity<ResponseWrapperAdsDto> getAllAds() {
+        log.info("получаем все объевления");
         List<Ads> adsList = adsRepository.findAll();
         log.info(adsList.toString());
         if (!adsList.isEmpty()) {
@@ -132,8 +130,10 @@ public class AdsServiceImpl implements AdsService {
             responseWrapperAdsDto.setCount(adsDtoList.size());
             responseWrapperAdsDto.setResult(adsDtoList);
            return ResponseEntity.ok(responseWrapperAdsDto);
+    } else {
+            log.info("объявлений не найдено");
+            return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.notFound().build();
     }
 
     @Override
@@ -204,7 +204,6 @@ public class AdsServiceImpl implements AdsService {
      * метод ищет обявления по частичному совпадению заголовка(tittle) и возвращает отсротированный по цене список
      *
      * @param tittle часть заоголовка
-     * @return
      */
     @Override
     public ResponseEntity<ResponseWrapperAdsDto> getAdsByTittle(String tittle) {

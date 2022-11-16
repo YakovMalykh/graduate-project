@@ -1,6 +1,5 @@
 package ru.skypro.homework.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -14,7 +13,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+
 import org.springframework.security.core.context.SecurityContextHolder;
+
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
@@ -28,8 +29,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import javax.validation.Valid;
 import java.io.IOException;
-
-
 
 @Slf4j
 
@@ -50,6 +49,7 @@ public class AdsController {
                     @ApiResponse(responseCode = "403", description = "Forbidden"),
                     @ApiResponse(responseCode = "404", description = "Not Found")
             })
+
     @PostMapping(value = "/", consumes =  MediaType.MULTIPART_FORM_DATA_VALUE)//consumes = {"multipart/mixed"},produces="applcation/json" )
     @ResponseStatus(HttpStatus.CREATED)
     @PreAuthorize("!hasRole('ROLE_ANONYMOUS')")
@@ -74,6 +74,16 @@ public class AdsController {
             @RequestBody MultipartFile file
     ) {
         return imageService.updateImage(adsPk.longValue(), id.longValue(), file);
+
+    @PostMapping(value = "/", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<AdsDto> addAds(
+            @Parameter(description = "передаем заполненное объявление") @RequestPart("properties") CreateAdsDto createAdsDto,
+            @RequestPart("image") MultipartFile imageList
+    ) throws IOException {
+        log.info("метод добавления нового объявления");
+        // createAdsDto.setImage(imageList.get(0).getFilePath());
+        return adsService.addAdsToDb(createAdsDto, imageList);
+
     }
     @Operation(summary = "получаем список всех объявлений",
             responses = {
@@ -83,7 +93,7 @@ public class AdsController {
                     @ApiResponse(responseCode = "403", description = "Forbidden"),
                     @ApiResponse(responseCode = "404", description = "Not Found")
             })
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<ResponseWrapperAdsDto> getAllAds() {
         log.info("метод получения всех объявлений");
 
@@ -116,11 +126,14 @@ public class AdsController {
             })
     @GetMapping("/me")
     public ResponseEntity<ResponseWrapperAdsDto> getAdsMe(
-            @Parameter(description = "true/false", required = false) @RequestParam(required = false) Boolean authenticated,
-            @Parameter(description = "authorities[0].authority", required = false) @RequestParam(required = false) String authority,
-            @Parameter(description = "credentials", required = false) @RequestParam(required = false) Object credentials,
-            @Parameter(description = "details", required = false) @RequestParam(required = false) Object details,
-            @Parameter(description = "principal", required = false) @RequestParam(required = false) Object principal
+
+            // здесь из Authentication достаем юзернейм и по нему достаем все объяыления этого пользователя
+            @Parameter(description = "true/false") @RequestParam(required = false) Boolean authenticated,
+            @Parameter(description = "authorities[0].authority") @RequestParam(required = false) String authority,
+            @Parameter(description = "credentials") @RequestParam(required = false) Object credentials,
+            @Parameter(description = "details") @RequestParam(required = false) Object details,
+            @Parameter(description = "principal") @RequestParam(required = false) Object principal
+
     ) {
 
         log.info("метод получения всех объявлений данного пользователя");
@@ -128,6 +141,9 @@ public class AdsController {
          return adsService.getAdsMe(auth);
     }
 
+    // USER может править только свои объявления, ADMIN может править объявления других пользователей
+
+    @PreAuthorize("@adsServiceImpl.getAds(#id).body.email.equals(authentication.principal.username) or hasAuthority('ADMIN')")
     @Operation(summary = "обновляем объявление по его id",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK",
@@ -137,14 +153,19 @@ public class AdsController {
                     @ApiResponse(responseCode = "403", description = "Forbidden")
             })
     @PatchMapping("/{id}")
+//    @Transactional // если поставить здесь эту аннотацию и использовать @PostAuthorize.. => вызывается метод, выполнятеся метод сервиса => в БД вносятся изменения
+    // => затем возвращается ответ в контроллер и здесь у нас не проходит проверка прописанная в @PostAuthorize, то в этом случае все изменения внесенные в БД откатятся?
     public ResponseEntity<AdsDto> updateAds(
             @Parameter(description = "передаем ID объявления") @PathVariable Integer id,
-            @RequestBody AdsDto adsDto
+            @RequestBody AdsDto adsDto,
+            Authentication authentication
     ) {
         log.info("метод обновления объявления");
         return adsService.updateAds(id, adsDto);
     }
 
+    // USER может удалять только свои объявления, ADMIN может удалять объявления других пользователей
+    @PreAuthorize("@adsServiceImpl.getAds(#id).body.email.equals(authentication.principal.username) or hasAuthority('ADMIN')")
     @Operation(summary = "удаляем объявление (по его ID) ",
             responses = {
                     @ApiResponse(responseCode = "204", description = "No Content"),
@@ -153,7 +174,8 @@ public class AdsController {
             })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> removeAds(
-            @Parameter(description = "передаем ID объявления") @PathVariable Integer id) {
+            @Parameter(description = "передаем ID объявления") @PathVariable Integer id
+    ) {
 
         log.info("метод удаления объявления");
         return adsService.deleteAds(Long.valueOf(id));
@@ -208,6 +230,9 @@ public class AdsController {
         return commentService.getAdsComment(adsPk, id);
     }
 
+    //    @PreAuthorize("@adsServiceImpl.getAds(#adsPk).body.email.equals(authentication.principal.username) or hasAuthority('ADMIN')") - к этому варианту можно вернуться,
+    //    когда разберемся с картинку у объявления
+    @PreAuthorize("@userServiceImpl.getUser(@commentServiceImpl.getAdsComment(#adsPk,#id).body.author).body.email.equals(authentication.principal.username) or hasAuthority('ADMIN')")
     @Operation(summary = "удаляем комментарий (по его ID) у данного обяъвления (по его первичному ключу)",
             responses = {
                     @ApiResponse(responseCode = "204", description = "No Content"),
@@ -223,6 +248,9 @@ public class AdsController {
         return commentService.deleteAdsComment(adsPk, id);
     }
 
+    //    @PreAuthorize("@adsServiceImpl.getAds(#adsPk).body.email.equals(authentication.principal.username) or hasAuthority('ADMIN')") - к этому варианту можно вернуться,
+    //    когда разберемся с картинку у объявления
+    @PreAuthorize("@userServiceImpl.getUser(@commentServiceImpl.getAdsComment(#adsPk,#id).body.author).body.email.equals(authentication.principal.username) or hasAuthority('ADMIN')")
     @Operation(summary = "обновляем существующий комментарий",
             responses = {
                     @ApiResponse(responseCode = "204", description = "No Content"),
