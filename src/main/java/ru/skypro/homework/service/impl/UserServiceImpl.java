@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Optional<User> userByEmail = userRepository.getUserByEmailIgnoreCase(username);
-        if (!userByEmail.isPresent()) {
+        if (userByEmail.isEmpty()) {
             throw new UsernameNotFoundException(String.format("User '%s' not found", username));
         }
         User user = userByEmail.get();
@@ -68,13 +68,16 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<ResponseWrapperUserDto> getUsers() {
         List<User> userList = userRepository.findAll();
+        log.info("получаем всех юзеров из БД");
         if (!userList.isEmpty()) {
             List<UserDto> listUserDto = userMapper.listUsersToListUserDto(userList);
             ResponseWrapperUserDto responseWrapperUserDto = new ResponseWrapperUserDto();
             responseWrapperUserDto.setCount(listUserDto.size());
             responseWrapperUserDto.setResult(listUserDto);
+            log.info("конвертировали в responseWrapperUserDto и отправляем");
             return ResponseEntity.ok(responseWrapperUserDto);
         } else {
+            log.info("юзеров не найдено");
             return ResponseEntity.notFound().build();
         }
 
@@ -115,6 +118,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<UserDto> getUser(Integer id) {
         Optional<User> optionalUser = userRepository.findById(id.longValue());
+        log.info("получаем юзера из БД");
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
             UserDto userDto = userMapper.userToUserDto(user);

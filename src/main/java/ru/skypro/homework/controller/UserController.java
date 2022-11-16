@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.ResponseWrapperUserDto;
@@ -18,11 +19,13 @@ import ru.skypro.homework.service.UserService;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
+
 public class UserController {
 
     private final UserService userService;
-
-       @Operation(
+    @PreAuthorize("hasAuthority('ADMIN')")//здесь прописываем авторити вместо ролей, т.к. у насх прописываются авторити у юзера
+    // все что без приставки ROLE_ являетися авторити
+    @Operation(
             summary = "выводим всех пользователей",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK",
