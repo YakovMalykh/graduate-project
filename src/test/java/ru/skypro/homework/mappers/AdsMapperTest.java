@@ -7,6 +7,7 @@ import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.AdsCommentDto;
 import ru.skypro.homework.dto.AdsDto;
 import ru.skypro.homework.dto.FullAdsDto;
@@ -16,6 +17,7 @@ import ru.skypro.homework.repositories.AdsRepository;
 import ru.skypro.homework.repositories.ImageRepository;
 import ru.skypro.homework.repositories.UserRepository;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -78,7 +80,9 @@ public class AdsMapperTest {
         TEST_ADS_2.setPrice(PRICE_2);
 
         LIST_ADS.add(TEST_ADS_1);
-        LIST_ADS.add(TEST_ADS_2);
+        LIST_ADS.add(TEST_ADS_1);
+        LIST_ADS_DTO.add(ADS_DTO);
+        LIST_ADS_DTO.add(ADS_DTO);
         LIST_COMMENTS.add(TEST_COMMENT_1);
         LIST_COMMENTS.add(TEST_COMMENT_2);
     }
@@ -91,7 +95,7 @@ public class AdsMapperTest {
 
     @Test
     void stringToImage_whenSuccess() {
-        when(imageRepository.findImageByFilePath(anyString())).thenReturn(IMAGE);
+        when(imageRepository.findImageByFilePath(anyString())).thenReturn(Optional.of(IMAGE));
         List<Image> result = mapper.stringToImage(IMAGE_STR);
         assertEquals(IMAGE_STR, result.get(0).getFilePath());
     }
@@ -110,7 +114,7 @@ public class AdsMapperTest {
 
     @Test
     void adsDtoToAds_whenMaps_thenCorrect() {
-        when(imageRepository.findImageByFilePath(anyString())).thenReturn(IMAGE);
+        when(imageRepository.findImageByFilePath(anyString())).thenReturn(Optional.of(IMAGE));
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(AUTHOR_2));
 
         Ads ads = mapper.adsDtoToAds(ADS_DTO);
@@ -133,7 +137,7 @@ public class AdsMapperTest {
 
     @Test
     void adsToFullAdsDto_whenMaps_thenCorrect() {
-        FullAdsDto fullAdsDto = mapper.adsToFullAdsDto(TEST_ADS_2, AUTHOR_2);
+        FullAdsDto fullAdsDto = mapper.adsToFullAdsDto(TEST_ADS_2, AUTHOR_2,LIST_IMAGES);
         assertEquals(2, fullAdsDto.getPk());
         assertEquals(DESCRIPTION_2, fullAdsDto.getDescription());
         assertEquals(PRICE_2, fullAdsDto.getPrice());
@@ -145,7 +149,7 @@ public class AdsMapperTest {
     @Test
     void listAdsToListAdsDto() {
         List<AdsDto> result = mapper.listAdsToListAdsDto(LIST_ADS);
-        assertEquals(ADS_DTO, result.get(0));
+        assertEquals(LIST_ADS_DTO, result);
      }
   /*  @Test
     void updateAdsFromAdsDto() {
