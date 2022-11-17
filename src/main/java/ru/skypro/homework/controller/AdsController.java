@@ -8,7 +8,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.bytebuddy.implementation.bind.annotation.Empty;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -27,13 +26,14 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import javax.validation.Valid;
+
 import java.io.IOException;
+import java.util.List;
 
 @Slf4j
 
 @RestController
-@RequestMapping(value="/ads")
+@RequestMapping(value = "/ads")
 @CrossOrigin(value = "http://localhost:3000")
 @RequiredArgsConstructor
 public class AdsController {
@@ -50,17 +50,23 @@ public class AdsController {
                     @ApiResponse(responseCode = "404", description = "Not Found")
             })
 
-    @PostMapping(value = "/", consumes =  MediaType.MULTIPART_FORM_DATA_VALUE)//consumes = {"multipart/mixed"},produces="applcation/json" )
+    @PostMapping(value = "/"
+
+           , produces = MediaType.APPLICATION_JSON_VALUE,consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE}
+    )
+//consumes = {"multipart/mixed"},produces="applcation/json" )
 //    @ResponseStatus(HttpStatus.CREATED)
 //    @PreAuthorize("!hasRole('ROLE_ANONYMOUS')") // - этого не нужно - у нас в WebSecurityConfig ограничен доступ к этому методу - только авторизованным
 
-     @Parameter(description = "передаем заполненное объявление")@ResponseStatus(HttpStatus.CREATED)
+//    @Parameter(description = "передаем заполненное объявление")
+//    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<AdsDto> addAds(
-            @Valid  @RequestPart("properties") @Parameter(schema=@Schema(type = "string", format="binary"))CreateAdsDto createAdsDto , @RequestPart("image") MultipartFile imageList
+//         @Valid    @Parameter(schema=@Schema(type = "string", format="binary"))
+            @RequestPart("properties") CreateAdsDto createAdsDto, @RequestPart("image") List<MultipartFile> imageList
 
     ) {
         log.info("метод добавления нового объявления");
-           try {
+        try {
             return adsService.addAdsToDb(createAdsDto, imageList);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -76,7 +82,7 @@ public class AdsController {
 //        return adsService.addAdsToDb(createAdsDto, imageList);
 //    }
 
-    @PatchMapping(value ="/{adsPk}/images/{id}", consumes =  MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(value = "/{adsPk}/images/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Image> updateImage(
             @PathVariable Integer adsPk,
             @PathVariable Integer id,
@@ -84,7 +90,6 @@ public class AdsController {
     ) {
         return imageService.updateImage(adsPk.longValue(), id.longValue(), file);
     }
-
 
 
     @Operation(summary = "получаем список всех объявлений",
@@ -99,7 +104,7 @@ public class AdsController {
     public ResponseEntity<ResponseWrapperAdsDto> getAllAds() {
         log.info("метод получения всех объявлений");
 
-               return adsService.getAllAds();
+        return adsService.getAllAds();
     }
 
     @Operation(summary = "получаем объявление (по его ID) ",
@@ -141,7 +146,7 @@ public class AdsController {
 
         log.info("метод получения всех объявлений данного пользователя");
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-         return adsService.getAdsMe(auth);
+        return adsService.getAdsMe(auth);
     }
 
     // USER может править только свои объявления, ADMIN может править объявления других пользователей

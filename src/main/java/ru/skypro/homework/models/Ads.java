@@ -7,7 +7,6 @@ import javax.persistence.*;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 @Entity
 @Getter
@@ -33,6 +32,7 @@ public class Ads {
 
     @OneToMany(mappedBy = "ads")
     @JsonIgnore
+    @Column(name = "images_id")
     private List<Image> images;
     @JsonIgnore
     @OneToMany(mappedBy = "adsId")
@@ -49,5 +49,18 @@ public class Ads {
     @Override
     public int hashCode() {
         return Objects.hash(id, author, images, title, description, price, comments);
+    }
+
+    @Override
+    public String toString() {
+        return "Ads{" +
+                "id=" + id +
+                ", author=" + author +
+                ", title='" + title + '\'' +
+                ", description='" + description + '\'' +
+                ", price=" + price +
+                ", images=" + images +
+                ", comments=" + comments +
+                '}';
     }
 }

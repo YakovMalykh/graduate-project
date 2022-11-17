@@ -11,7 +11,7 @@ import java.util.Objects;
 @Entity
 @Getter
 @Setter
-@ToString
+@ToString(exclude = {"password"})
 @RequiredArgsConstructor
 @Table(name = "users")
 public class User {

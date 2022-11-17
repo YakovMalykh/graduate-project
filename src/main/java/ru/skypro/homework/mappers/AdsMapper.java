@@ -15,7 +15,6 @@ import ru.skypro.homework.repositories.UserRepository;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Mapper(componentModel = "spring", injectionStrategy = InjectionStrategy.CONSTRUCTOR)
 public abstract class AdsMapper {
@@ -23,6 +22,7 @@ public abstract class AdsMapper {
     protected UserRepository userRepository;
     @Autowired
     protected ImageRepository imageRepository;
+
     @Mapping(target = "pk", source = "id")
     @Mapping(target = "image", source = "images")
     public abstract AdsDto adsToAdsDto(Ads ads);
@@ -31,29 +31,32 @@ public abstract class AdsMapper {
         return Math.toIntExact(author.getId());
     }
 
-    public String imageToString (List<Image> images)
-    {
-        String imageStr=new String();
-        if (!images.isEmpty()){
-       imageStr= images.get(0).getFilePath();}
+    public String imageToString(List<Image> images) {
+        String imageStr = "";
+        if (!images.isEmpty()) {
+            imageStr += images.get(0).getFilePath();
+        }
         return imageStr;
     }
+
     @Mapping(target = "id", source = "pk")
     @Mapping(target = "images", source = "image")
     public abstract Ads adsDtoToAds(AdsDto adsDto);
-    public List<Image>  stringToImage (String imageStr) { //не понятно, как тут все таки надо возвращать
-        Image image= imageRepository.findImageByFilePath(imageStr).orElse(new Image());
-        List  <Image> images=new ArrayList<>();
-                 images.add(image);
-               return images;
+
+    public List<Image> stringToImage(String imageStr) { //не понятно, как тут все таки надо возвращать
+        Image image = imageRepository.findImageByFilePath(imageStr).orElse(new Image());
+        List<Image> images = new ArrayList<>();
+        images.add(image);
+        return images;
     }
+
     public User integerToUser(Integer authorId) {
-          User user = userRepository.findById(authorId.longValue()).get();
+        User user = userRepository.findById(authorId.longValue()).get();
         return user;
     }
 
 
-   // @Mapping(target = "id", source = "pk")
+    // @Mapping(target = "id", source = "pk")
     public abstract Ads createAdsDtoToAds(CreateAdsDto createAdsDto);
 
     @Mapping(target = "pk", source = "ads.id")
@@ -63,10 +66,11 @@ public abstract class AdsMapper {
 
     public abstract FullAdsDto adsToFullAdsDto(Ads ads, User user, List<Image> images);
 
-  //@Mapping(target = "author", source = "user")
-  @Mapping(target = "author", source = "user.id")
-  // @Mapping(target = "authorLastName", source = "user.lastName")
-    public abstract Ads createAdsDtoUserImageToAds(CreateAdsDto createAdsDto, User user, List<Image> images);
+    //@Mapping(target = "author", source = "user")
+//    @Mapping(target = "author", source = "user.id")
+//    @Mapping(target = "id", ignore = true)
+//    // @Mapping(target = "authorLastName", source = "user.lastName")
+//    public abstract Ads createAdsDtoUserToAds(CreateAdsDto createAdsDto, User user);
 
     @Mapping(target = "id", source = "pk")// не знаю нужно ли это в данном случае
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
@@ -80,5 +84,5 @@ public abstract class AdsMapper {
     @Mapping(target = "mediaType", expression = "java(file.getContentType())")
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "prewiew", expression = "java(file.getBytes())")
-    public abstract  Image imageToFile (MultipartFile file) throws IOException;
+    public abstract Image imageToFile(MultipartFile file) throws IOException;
 }
