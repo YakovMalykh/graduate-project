@@ -51,15 +51,14 @@ public class AdsController {
             })
 
     @PostMapping(value = "/", consumes =  MediaType.MULTIPART_FORM_DATA_VALUE)//consumes = {"multipart/mixed"},produces="applcation/json" )
-    @ResponseStatus(HttpStatus.CREATED)
-    @PreAuthorize("!hasRole('ROLE_ANONYMOUS')")
+//    @ResponseStatus(HttpStatus.CREATED)
+//    @PreAuthorize("!hasRole('ROLE_ANONYMOUS')") // - этого не нужно - у нас в WebSecurityConfig ограничен доступ к этому методу - только авторизованным
 
-    // @Parameter(description = "передаем заполненное объявление")@ResponseStatus(HttpStatus.CREATED)
+     @Parameter(description = "передаем заполненное объявление")@ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<AdsDto> addAds(
             @Valid  @RequestPart("properties") @Parameter(schema=@Schema(type = "string", format="binary"))CreateAdsDto createAdsDto , @RequestPart("image") MultipartFile imageList
 
     ) {
-
         log.info("метод добавления нового объявления");
            try {
             return adsService.addAdsToDb(createAdsDto, imageList);
@@ -67,6 +66,16 @@ public class AdsController {
             throw new RuntimeException(e);
         }
     }
+//        @PostMapping(value = "/", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    public ResponseEntity<AdsDto> addAds(
+//            @Parameter(description = "передаем заполненное объявление") @RequestPart("properties") CreateAdsDto createAdsDto,
+//            @RequestPart("image") MultipartFile imageList
+//    ) throws IOException {
+//        log.info("метод добавления нового объявления");
+//        // createAdsDto.setImage(imageList.get(0).getFilePath());
+//        return adsService.addAdsToDb(createAdsDto, imageList);
+//    }
+
     @PatchMapping(value ="/{adsPk}/images/{id}", consumes =  MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Image> updateImage(
             @PathVariable Integer adsPk,
@@ -74,17 +83,10 @@ public class AdsController {
             @RequestBody MultipartFile file
     ) {
         return imageService.updateImage(adsPk.longValue(), id.longValue(), file);
-
-    @PostMapping(value = "/", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<AdsDto> addAds(
-            @Parameter(description = "передаем заполненное объявление") @RequestPart("properties") CreateAdsDto createAdsDto,
-            @RequestPart("image") MultipartFile imageList
-    ) throws IOException {
-        log.info("метод добавления нового объявления");
-        // createAdsDto.setImage(imageList.get(0).getFilePath());
-        return adsService.addAdsToDb(createAdsDto, imageList);
-
     }
+
+
+
     @Operation(summary = "получаем список всех объявлений",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK",
@@ -128,6 +130,7 @@ public class AdsController {
     public ResponseEntity<ResponseWrapperAdsDto> getAdsMe(
 
             // здесь из Authentication достаем юзернейм и по нему достаем все объяыления этого пользователя
+            // зачем нам все эти параметры, елси мы достаем нужные нам данные из Authentication? можем мы их убрать и оставть только Authentication?
             @Parameter(description = "true/false") @RequestParam(required = false) Boolean authenticated,
             @Parameter(description = "authorities[0].authority") @RequestParam(required = false) String authority,
             @Parameter(description = "credentials") @RequestParam(required = false) Object credentials,
