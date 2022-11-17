@@ -14,7 +14,7 @@ import java.util.Objects;
 @Entity
 @Getter
 @Setter
-@ToString
+//@ToString
 @RequiredArgsConstructor
 @Table(name = "images")
 public class Image {

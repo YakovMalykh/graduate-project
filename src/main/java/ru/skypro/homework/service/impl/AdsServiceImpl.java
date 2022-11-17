@@ -2,7 +2,12 @@ package ru.skypro.homework.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
@@ -11,6 +16,7 @@ import ru.skypro.homework.models.Ads;
 import ru.skypro.homework.models.Image;
 import ru.skypro.homework.models.User;
 import ru.skypro.homework.repositories.AdsRepository;
+import ru.skypro.homework.repositories.CommentRepository;
 import ru.skypro.homework.repositories.ImageRepository;
 import ru.skypro.homework.repositories.UserRepository;
 import ru.skypro.homework.service.AdsService;
@@ -22,6 +28,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,22 +44,31 @@ public class AdsServiceImpl implements AdsService {
     private final AdsRepository adsRepository;
     private final UserRepository userRepository;
     private final ImageRepository imageRepository;
+    private final CommentRepository commentRepository;
     private final AdsMapper adsMapper;
 
-    public AdsServiceImpl(AdsRepository adsRepository, UserRepository userRepository, ImageRepository imageRepository, AdsMapper adsMapper) {
+    public AdsServiceImpl(AdsRepository adsRepository, UserRepository userRepository, ImageRepository imageRepository, CommentServiceImpl commentService, CommentRepository commentRepository, AdsMapper adsMapper) {
         this.adsRepository = adsRepository;
         this.userRepository = userRepository;
         this.imageRepository = imageRepository;
+        this.commentRepository = commentRepository;
         this.adsMapper = adsMapper;
     }
 
-
-    @Override //метод пока не отрабатывает, т.к. нет автора
+    @Override
     public ResponseEntity<AdsDto> addAdsToDb(CreateAdsDto createAdsDto, MultipartFile file) throws IOException {
-        if (createAdsDto != null) {
-            Ads savedAds = adsRepository.save(adsMapper.createAdsDtoToAds(createAdsDto));
-            AdsDto adsDto = adsMapper.adsToAdsDto(savedAds);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
+        log.info("метод addAdsToD");
+        if (createAdsDto != null) {
+           User user = userRepository.getUserByEmailIgnoreCase(auth.getName()).orElseThrow();
+            List<Image> images = new ArrayList<>();
+            images.add(adsMapper.imageToFile(file));
+            Ads ads = adsMapper.createAdsDtoUserImageToAds(createAdsDto, user, images);
+            Ads savedAds = adsRepository.save(adsMapper.createAdsDtoToAds(createAdsDto));
+            log.info(savedAds.toString());
+            AdsDto adsDto = adsMapper.adsToAdsDto(savedAds);
+            log.info(adsDto.toString());
             Path filePath = Path.of(imageDir, savedAds.getId() + "." + getExtensions(file.getOriginalFilename()));
             Files.createDirectories(filePath.getParent());
             Files.deleteIfExists(filePath);
@@ -64,6 +80,7 @@ public class AdsServiceImpl implements AdsService {
             ) {
                 bis.transferTo(bos);
             }
+
             Image image = new Image();
             image.setAds(savedAds);
             image.setFilePath(filePath.toString());
@@ -106,26 +123,32 @@ public class AdsServiceImpl implements AdsService {
     public ResponseEntity<ResponseWrapperAdsDto> getAllAds() {
         log.info("получаем все объевления");
         List<Ads> adsList = adsRepository.findAll();
+        log.info(adsList.toString());
         if (!adsList.isEmpty()) {
-            List<AdsDto> adsDtoList = adsMapper.listAdsToListAdsDto(adsList);
-            ResponseWrapperAdsDto responseWrapperAdsDto = new ResponseWrapperAdsDto();
+             List<AdsDto> adsDtoList = adsMapper.listAdsToListAdsDto(adsList);
+             ResponseWrapperAdsDto responseWrapperAdsDto = new ResponseWrapperAdsDto();
             responseWrapperAdsDto.setCount(adsDtoList.size());
             responseWrapperAdsDto.setResult(adsDtoList);
-            return ResponseEntity.ok(responseWrapperAdsDto);
-        } else {
+           return ResponseEntity.ok(responseWrapperAdsDto);
+    } else {
             log.info("объявлений не найдено");
             return ResponseEntity.notFound().build();
         }
     }
 
-
     @Override
-    public ResponseEntity<Void> deleteAds(Long adsPk) {
-        if (adsPk != null) {
-            adsRepository.deleteById(adsPk);
-            log.info(" ad with Id: " + adsPk + " deleted");
+    public ResponseEntity<ResponseWrapperAdsDto> getAdsMe(Authentication auth) {
+        String username = auth.getName();
+        User user = userRepository.getUserByEmailIgnoreCase(username).orElseThrow();
+        List<Ads> adsList = adsRepository.findAllByAuthor_Id(user.getId()); //потом заменим на автора из контекста
+         if (!adsList.isEmpty()) {
+            List<AdsDto> adsDtoList = adsMapper.listAdsToListAdsDto(adsList);
+            ResponseWrapperAdsDto responseWrapperAdsDto = new ResponseWrapperAdsDto();
+            responseWrapperAdsDto.setCount(adsDtoList.size());
+            responseWrapperAdsDto.setResult(adsDtoList);
+            return ResponseEntity.status(HttpStatus.OK).body(responseWrapperAdsDto);
+
         }
-        log.info("not found ad");
         return ResponseEntity.notFound().build();
     }
 
@@ -134,13 +157,31 @@ public class AdsServiceImpl implements AdsService {
         Optional<Ads> optionalAds = adsRepository.findById(adsPk.longValue());
 
         if (optionalAds.isPresent()) {
+
             Optional<User> optionslUser = userRepository.findById(optionalAds.get().getAuthor().getId());
-            FullAdsDto fullAdsDto = adsMapper.adsToFullAdsDto(optionalAds.get(), optionslUser.get());
+            //FullAdsDto fullAdsDto = adsMapper.adsToFullAdsDto(optionalAds.get(), optionslUser.get());
+            List<Image> images = imageRepository.findImagesByAds(optionalAds.get());
+            FullAdsDto fullAdsDto = adsMapper.adsToFullAdsDto(optionalAds.get(), optionslUser.get(), images);
+
             return ResponseEntity.ok(fullAdsDto);
         } else {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @Override
+    public ResponseEntity<Void> deleteAds(Long adsPk) {
+        if (adsPk != null && adsRepository.findById(adsPk.longValue()).isPresent()) {
+            adsRepository.deleteById(adsPk.longValue());
+            imageRepository.deleteAllByAds_Id(adsPk.longValue());
+            commentRepository.findAllByAdsId(adsPk.longValue());
+            log.info(" ad with Id: " + adsPk + " deleted");
+        }
+        log.info("not found ad");
+        return ResponseEntity.notFound().build();
+    }
+
+
 
     @Override
     public ResponseEntity<AdsDto> updateAds(Integer adsPk, AdsDto adsDto) {
@@ -158,18 +199,6 @@ public class AdsServiceImpl implements AdsService {
         }
     }
 
-    @Override
-    public ResponseEntity<ResponseWrapperAdsDto> getAdsMe(Boolean authenticated, String authority, Object credentials, Object details, Object principal) {
-        List<Ads> adsList = adsRepository.findAllByAuthor_Id(3L); //потом заменим на автора из контекста
-        if (!adsList.isEmpty()) {
-            List<AdsDto> adsDtoList = adsMapper.listAdsToListAdsDto(adsList);
-            ResponseWrapperAdsDto responseWrapperAdsDto = new ResponseWrapperAdsDto();
-            responseWrapperAdsDto.setCount(adsDtoList.size());
-            responseWrapperAdsDto.setResult(adsDtoList);
-            return ResponseEntity.ok(responseWrapperAdsDto);
-        }
-        return ResponseEntity.notFound().build();
-    }
 
     /**
      * метод ищет обявления по частичному совпадению заголовка(tittle) и возвращает отсротированный по цене список

@@ -12,7 +12,7 @@ import java.util.Set;
 @Entity
 @Getter
 @Setter
-@ToString
+//@ToString
 @RequiredArgsConstructor
 @Table(name = "ads")
 public class Ads {

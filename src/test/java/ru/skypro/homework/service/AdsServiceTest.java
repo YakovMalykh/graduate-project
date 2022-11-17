@@ -95,7 +95,7 @@ public class AdsServiceTest {
         assertEquals(LIST_ADS_DTO, response.getBody().getResult());
     }
 
-/*    @Test
+    /*   @Test
   void addToDbSuccessful() {
         when(adsMapper.createAdsDtoToAds(any(CreateAdsDto.class))).thenReturn(TEST_ADS_2);
         when(adsRepository.save(any(Ads.class))).thenReturn(TEST_ADS_2);
@@ -104,7 +104,7 @@ public class AdsServiceTest {
         assertNotNull(response);
     }
 
-    @Test
+    /*   @Test
     void addToDbFailed() {
         ResponseEntity<AdsDto> response = adsService.addAdsToDb( null, null);
         assertEquals(ResponseEntity.notFound().build(), response);
