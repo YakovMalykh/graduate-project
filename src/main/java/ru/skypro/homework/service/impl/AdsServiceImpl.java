@@ -59,45 +59,32 @@ public class AdsServiceImpl implements AdsService {
 
         log.info("метод addAdsToD");
         if (createAdsDto != null) {
-            Ads ads = adsMapper.createAdsDtoToAds(createAdsDto);
+            Ads ad = adsMapper.createAdsDtoToAds(createAdsDto);
             User user = userRepository.getUserByEmailIgnoreCase(auth.getName()).orElseThrow();
-            ads.setAuthor(user);
 
             List<Image> images = new ArrayList<>();
             for (MultipartFile file : filesList) {
-                Path filePath = saveFileIntoFolder(imageDir, ads, file);
-                Image image = saveImageIntoDb(filePath, ads, file);
+                Path filePath = saveFileIntoFolder(imageDir, ad, file);
+                Image image = saveImageIntoDb(filePath, ad, file);
                 images.add(image);
             }
-            ads.setImages(images);
-//            Image image1 = adsMapper.imageToFile(file);
-//            log.info("image " + image1);
-//            images.add(image1);
 
-//            adsMapper.createAdsDtoUserToAds(createAdsDto, user);//переписал метод ,т.к.
-            // Image здесь лишний параметр или вообще можно обойтись createAdsDtoToAds
-//            log.info(createAdsDto.toString());
-            log.info(ads.toString() + "  " + ads.getId());
-//            Ads adsDtoToAds = adsMapper.createAdsDtoToAds(createAdsDto);
-//            log.info(adsDtoToAds.toString());
+            ad.setAuthor(user);
+            ad.setImages(images);
 
-            Ads savedAds = adsRepository.save(ads);
-            log.info("сохранили " + savedAds.toString() + "  " + savedAds.getId());
+            Ads savedAd = adsRepository.save(ad);
+            AdsDto adsDto = adsMapper.adsToAdsDto(savedAd);
 
-            AdsDto adsDto = adsMapper.adsToAdsDto(savedAds);
-            log.info("получили " + adsDto.toString());
-
-
-            log.info("new ad saved to DB! Id: " + savedAds.getId() + ", author: " + savedAds.getAuthor());
+            log.info("new ad is saved to DB! Id: " + savedAd.getId() + ", author: " + savedAd.getAuthor());
             return ResponseEntity.ok(adsDto);
         }
         log.info("something wrong with saving");
         return ResponseEntity.notFound().build();
     }
 
-    private Path saveFileIntoFolder(String imageDir, Ads savedAds, MultipartFile file) throws IOException {
-        // вместо savedAds.getId() м. прописать tittle, на момент вызоыва метода Id еще null
-        Path filePath = Path.of(imageDir, savedAds.getId() + file.getOriginalFilename() + "." + getExtensions(file.getOriginalFilename()));
+    private Path saveFileIntoFolder(String imageDir, Ads ad, MultipartFile file) throws IOException {
+        // вместо ad.getId() м. прописать tittle, на момент вызоыва метода Id еще null
+        Path filePath = Path.of(imageDir, ad.getTitle() + "_" + file.getOriginalFilename() + "." + getExtensions(file.getOriginalFilename()));
         Files.createDirectories(filePath.getParent());
         Files.deleteIfExists(filePath);
 
@@ -115,9 +102,9 @@ public class AdsServiceImpl implements AdsService {
     /**
      * этот метод следовало бы размещать в ImageService
      */
-    private Image saveImageIntoDb(Path filePath, Ads savedAds, MultipartFile file) throws IOException {
+    private Image saveImageIntoDb(Path filePath, Ads savedAd, MultipartFile file) throws IOException {
         Image image = new Image();
-        image.setAds(savedAds);
+        image.setAds(savedAd);
         image.setFilePath(filePath.toString());
         image.setFileSize(file.getSize());
         image.setMediaType(file.getContentType());
@@ -153,14 +140,14 @@ public class AdsServiceImpl implements AdsService {
 
     @Override
     public ResponseEntity<ResponseWrapperAdsDto> getAllAds() {
-        log.info("получаем все объевления");
         List<Ads> adsList = adsRepository.findAll();
-        log.info(adsList.toString());
+//        log.info(adsList.toString());
         if (!adsList.isEmpty()) {
             List<AdsDto> adsDtoList = adsMapper.listAdsToListAdsDto(adsList);
             ResponseWrapperAdsDto responseWrapperAdsDto = new ResponseWrapperAdsDto();
             responseWrapperAdsDto.setCount(adsDtoList.size());
             responseWrapperAdsDto.setResult(adsDtoList);
+            log.info("получили все объявления");
             return ResponseEntity.ok(responseWrapperAdsDto);
         } else {
             log.info("объявлений не найдено");
@@ -203,14 +190,33 @@ public class AdsServiceImpl implements AdsService {
 
     @Override
     public ResponseEntity<Void> deleteAds(Long adsPk) {
-        if (adsPk != null && adsRepository.findById(adsPk.longValue()).isPresent()) {
-            adsRepository.deleteById(adsPk.longValue());
-            imageRepository.deleteAllByAds_Id(adsPk.longValue());
-            commentRepository.findAllByAdsId(adsPk.longValue());
-            log.info(" ad with Id: " + adsPk + " deleted");
+        Optional<Ads> optionalAds = adsRepository.findById(adsPk);
+        if (optionalAds.isPresent()) {
+            removeFileFromFolder(optionalAds.get());
+            imageRepository.deleteAllByAds(optionalAds.get());
+            commentRepository.deleteAllByAdsId(optionalAds.get());
+            adsRepository.deleteById(adsPk);
+            log.info(" ad with Id: " + adsPk + "is deleted");
+            return ResponseEntity.ok().build();
+        } else {
+            log.info("not found ad");
+            return ResponseEntity.status(204).build();
         }
-        log.info("not found ad");
-        return ResponseEntity.notFound().build();
+    }
+
+
+    private void removeFileFromFolder(Ads ad) {
+        imageRepository.findImagesByAds(ad).forEach(e -> {
+                    String filePath = e.getFilePath();
+                    Path path = Path.of(filePath);
+                    try {
+                        log.info("файл " + filePath + " удален");
+                        Files.deleteIfExists(path);
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }
+        );
     }
 
 

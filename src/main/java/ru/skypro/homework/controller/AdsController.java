@@ -50,16 +50,7 @@ public class AdsController {
                     @ApiResponse(responseCode = "404", description = "Not Found")
             })
 
-    @PostMapping(value = "/"
-
-           , produces = MediaType.APPLICATION_JSON_VALUE,consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE}
-    )
-//consumes = {"multipart/mixed"},produces="applcation/json" )
-//    @ResponseStatus(HttpStatus.CREATED)
-//    @PreAuthorize("!hasRole('ROLE_ANONYMOUS')") // - этого не нужно - у нас в WebSecurityConfig ограничен доступ к этому методу - только авторизованным
-
-//    @Parameter(description = "передаем заполненное объявление")
-//    @ResponseStatus(HttpStatus.CREATED)
+    @PostMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<AdsDto> addAds(
 //         @Valid    @Parameter(schema=@Schema(type = "string", format="binary"))
             @RequestPart("properties") CreateAdsDto createAdsDto, @RequestPart("image") List<MultipartFile> imageList
@@ -72,15 +63,6 @@ public class AdsController {
             throw new RuntimeException(e);
         }
     }
-//        @PostMapping(value = "/", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//    public ResponseEntity<AdsDto> addAds(
-//            @Parameter(description = "передаем заполненное объявление") @RequestPart("properties") CreateAdsDto createAdsDto,
-//            @RequestPart("image") MultipartFile imageList
-//    ) throws IOException {
-//        log.info("метод добавления нового объявления");
-//        // createAdsDto.setImage(imageList.get(0).getFilePath());
-//        return adsService.addAdsToDb(createAdsDto, imageList);
-//    }
 
     @PatchMapping(value = "/{adsPk}/images/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Image> updateImage(

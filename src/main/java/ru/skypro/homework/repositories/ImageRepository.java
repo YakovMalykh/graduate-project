@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public interface ImageRepository extends JpaRepository <Image, Long> {
    Optional< Image> findImageByFilePath(String filePath);
-   void deleteAllByAds_Id (Long adsId);
+   void deleteAllByAds (Ads adsId);
 
    List<Image> findImagesByAds (Ads ads);
 }
