@@ -2,9 +2,7 @@ package ru.skypro.homework.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -56,39 +54,39 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
-    public ResponseEntity<AdsDto> addAdsToDb(CreateAdsDto createAdsDto, MultipartFile file) throws IOException {
+    public ResponseEntity<AdsDto> addAdsToDb(CreateAdsDto createAdsDto, List<MultipartFile> filesList) throws IOException {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         log.info("метод addAdsToD");
         if (createAdsDto != null) {
-           User user = userRepository.getUserByEmailIgnoreCase(auth.getName()).orElseThrow();
-            List<Image> images = new ArrayList<>();
-            images.add(adsMapper.imageToFile(file));
-            Ads ads = adsMapper.createAdsDtoUserImageToAds(createAdsDto, user, images);
-            Ads savedAds = adsRepository.save(adsMapper.createAdsDtoToAds(createAdsDto));
-            log.info(savedAds.toString());
-            AdsDto adsDto = adsMapper.adsToAdsDto(savedAds);
-            log.info(adsDto.toString());
-            Path filePath = Path.of(imageDir, savedAds.getId() + "." + getExtensions(file.getOriginalFilename()));
-            Files.createDirectories(filePath.getParent());
-            Files.deleteIfExists(filePath);
-            try (
-                    InputStream is = file.getInputStream();
-                    OutputStream os = Files.newOutputStream(filePath, CREATE_NEW);
-                    BufferedInputStream bis = new BufferedInputStream(is, 1024);
-                    BufferedOutputStream bos = new BufferedOutputStream(os, 1024)
-            ) {
-                bis.transferTo(bos);
-            }
+            Ads ads = adsMapper.createAdsDtoToAds(createAdsDto);
+            User user = userRepository.getUserByEmailIgnoreCase(auth.getName()).orElseThrow();
+            ads.setAuthor(user);
 
-            Image image = new Image();
-            image.setAds(savedAds);
-            image.setFilePath(filePath.toString());
-            image.setFileSize(file.getSize());
-            image.setMediaType(file.getContentType());
-            image.setPrewiew(file.getBytes());
-            image.setPrewiew(generatePreview(filePath));
-            imageRepository.save(image);
+            List<Image> images = new ArrayList<>();
+            for (MultipartFile file : filesList) {
+                Path filePath = saveFileIntoFolder(imageDir, ads, file);
+                Image image = saveImageIntoDb(filePath, ads, file);
+                images.add(image);
+            }
+            ads.setImages(images);
+//            Image image1 = adsMapper.imageToFile(file);
+//            log.info("image " + image1);
+//            images.add(image1);
+
+//            adsMapper.createAdsDtoUserToAds(createAdsDto, user);//переписал метод ,т.к.
+            // Image здесь лишний параметр или вообще можно обойтись createAdsDtoToAds
+//            log.info(createAdsDto.toString());
+            log.info(ads.toString() + "  " + ads.getId());
+//            Ads adsDtoToAds = adsMapper.createAdsDtoToAds(createAdsDto);
+//            log.info(adsDtoToAds.toString());
+
+            Ads savedAds = adsRepository.save(ads);
+            log.info("сохранили " + savedAds.toString() + "  " + savedAds.getId());
+
+            AdsDto adsDto = adsMapper.adsToAdsDto(savedAds);
+            log.info("получили " + adsDto.toString());
+
 
             log.info("new ad saved to DB! Id: " + savedAds.getId() + ", author: " + savedAds.getAuthor());
             return ResponseEntity.ok(adsDto);
@@ -97,8 +95,42 @@ public class AdsServiceImpl implements AdsService {
         return ResponseEntity.notFound().build();
     }
 
+    private Path saveFileIntoFolder(String imageDir, Ads savedAds, MultipartFile file) throws IOException {
+        // вместо savedAds.getId() м. прописать tittle, на момент вызоыва метода Id еще null
+        Path filePath = Path.of(imageDir, savedAds.getId() + file.getOriginalFilename() + "." + getExtensions(file.getOriginalFilename()));
+        Files.createDirectories(filePath.getParent());
+        Files.deleteIfExists(filePath);
+
+        try (
+                InputStream is = file.getInputStream();
+                OutputStream os = Files.newOutputStream(filePath, CREATE_NEW);
+                BufferedInputStream bis = new BufferedInputStream(is, 1024);
+                BufferedOutputStream bos = new BufferedOutputStream(os, 1024)
+        ) {
+            bis.transferTo(bos);
+        }
+        return filePath;
+    }
+
+    /**
+     * этот метод следовало бы размещать в ImageService
+     */
+    private Image saveImageIntoDb(Path filePath, Ads savedAds, MultipartFile file) throws IOException {
+        Image image = new Image();
+        image.setAds(savedAds);
+        image.setFilePath(filePath.toString());
+        image.setFileSize(file.getSize());
+        image.setMediaType(file.getContentType());
+        image.setPrewiew(file.getBytes()); // это получается лишнее
+//        image.setPrewiew(generatePreview(filePath));
+        return imageRepository.save(image);
+    }
+
+    /**
+     * нужен ли он нам???
+     */
     private byte[] generatePreview(Path filePath) throws IOException {
-        log.info("metod generatePreview started");
+        log.info("method generatePreview started");
         try (InputStream is = Files.newInputStream(filePath);
              BufferedInputStream bis = new BufferedInputStream(is, 1024);
              ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
@@ -115,7 +147,7 @@ public class AdsServiceImpl implements AdsService {
     }
 
     private String getExtensions(String fileName) {
-        log.info("metod getExtensions started");
+        log.info("method getExtensions started");
         return fileName.substring(fileName.lastIndexOf(".") + 1);
     }
 
@@ -125,12 +157,12 @@ public class AdsServiceImpl implements AdsService {
         List<Ads> adsList = adsRepository.findAll();
         log.info(adsList.toString());
         if (!adsList.isEmpty()) {
-             List<AdsDto> adsDtoList = adsMapper.listAdsToListAdsDto(adsList);
-             ResponseWrapperAdsDto responseWrapperAdsDto = new ResponseWrapperAdsDto();
+            List<AdsDto> adsDtoList = adsMapper.listAdsToListAdsDto(adsList);
+            ResponseWrapperAdsDto responseWrapperAdsDto = new ResponseWrapperAdsDto();
             responseWrapperAdsDto.setCount(adsDtoList.size());
             responseWrapperAdsDto.setResult(adsDtoList);
-           return ResponseEntity.ok(responseWrapperAdsDto);
-    } else {
+            return ResponseEntity.ok(responseWrapperAdsDto);
+        } else {
             log.info("объявлений не найдено");
             return ResponseEntity.notFound().build();
         }
@@ -141,7 +173,7 @@ public class AdsServiceImpl implements AdsService {
         String username = auth.getName();
         User user = userRepository.getUserByEmailIgnoreCase(username).orElseThrow();
         List<Ads> adsList = adsRepository.findAllByAuthor_Id(user.getId()); //потом заменим на автора из контекста
-         if (!adsList.isEmpty()) {
+        if (!adsList.isEmpty()) {
             List<AdsDto> adsDtoList = adsMapper.listAdsToListAdsDto(adsList);
             ResponseWrapperAdsDto responseWrapperAdsDto = new ResponseWrapperAdsDto();
             responseWrapperAdsDto.setCount(adsDtoList.size());
@@ -180,7 +212,6 @@ public class AdsServiceImpl implements AdsService {
         log.info("not found ad");
         return ResponseEntity.notFound().build();
     }
-
 
 
     @Override

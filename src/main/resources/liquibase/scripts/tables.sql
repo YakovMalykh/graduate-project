@@ -30,3 +30,6 @@ CREATE TABLE IF NOT EXISTS comment
     comment_created TIMESTAMP NOT NULL,
     comment_text TEXT NOT NULL
     );
+
+
+
