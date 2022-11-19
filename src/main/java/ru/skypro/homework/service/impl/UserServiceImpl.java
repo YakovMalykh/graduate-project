@@ -82,13 +82,19 @@ public class UserServiceImpl implements UserService {
             log.info("Текущего пользователя не в БД");
             return ResponseEntity.notFound().build();
         }
-        if (!encoder.matches(passwordDto.getCurrentPassword(), optionalUser.get().getPassword())) {
+        log.info(passwordDto.getCurrentPassword());
+        log.info(optionalUser.get().getPassword());
+        if (passwordDto.getNewPassword().isEmpty() || !encoder.matches(passwordDto.getCurrentPassword(), optionalUser.get().getPassword())) {
             log.info("Текущий пароль указан неверно");
             return ResponseEntity.notFound().build();
         }
         User user = optionalUser.get();
-        userMapper.updatePassword(passwordDto, user);
+        user.setPassword(encoder.encode(passwordDto.getNewPassword()));
+        //мне кажется здесь не нужен маппер
+      //  userMapper.updatePassword(passwordDto, user);
         userRepository.save(user);
+        log.info("Пароль текущего пользователя обновлен");
+        //а мы должны открыто возвращать пароль или закодировано?
         return ResponseEntity.ok(passwordDto);
     }
 

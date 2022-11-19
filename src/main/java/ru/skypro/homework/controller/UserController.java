@@ -9,7 +9,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.ResponseWrapperUserDto;
@@ -73,10 +72,11 @@ public class UserController {
             }
     )
     @PostMapping("/set_password")
-    public ResponseEntity<NewPasswordDto> setPassword(@RequestBody NewPasswordDto passwordDto) {
+    public ResponseEntity<NewPasswordDto> setPassword(@RequestBody NewPasswordDto passwordDto, Authentication auth) {
         log.info("метод установки пользователю нового пароля");
         // метод сервиса еще не дописан
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        //если мы передаем аутентификацию в контроллер, то она автоматом берется из контекста?
+        // Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return userService.setPassword(passwordDto, auth);
     }
 
