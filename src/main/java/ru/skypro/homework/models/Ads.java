@@ -32,7 +32,6 @@ public class Ads {
 
     @OneToMany(mappedBy = "ads")
     @JsonIgnore
-    @Column(name = "images_id")
     private List<Image> images;
     @JsonIgnore
     @OneToMany(mappedBy = "adsId")
@@ -43,13 +42,25 @@ public class Ads {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Ads ads = (Ads) o;
-        return Objects.equals(id, ads.id) && Objects.equals(author, ads.author) && Objects.equals(images, ads.images) && Objects.equals(title, ads.title) && Objects.equals(description, ads.description) && Objects.equals(price, ads.price) && Objects.equals(comments, ads.comments);
+        return author.equals(ads.author) && title.equals(ads.title) && description.equals(ads.description);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, author, images, title, description, price, comments);
+        return Objects.hash(author, title, description);
     }
+//    @Override
+//    public boolean equals(Object o) {
+//        if (this == o) return true;
+//        if (o == null || getClass() != o.getClass()) return false;
+//        Ads ads = (Ads) o;
+//        return Objects.equals(id, ads.id) && Objects.equals(author, ads.author) && Objects.equals(images, ads.images) && Objects.equals(title, ads.title) && Objects.equals(description, ads.description) && Objects.equals(price, ads.price) && Objects.equals(comments, ads.comments);
+//    }
+//
+//    @Override
+//    public int hashCode() {
+//        return Objects.hash(id, author, images, title, description, price, comments);
+//    }
 
     @Override
     public String toString() {

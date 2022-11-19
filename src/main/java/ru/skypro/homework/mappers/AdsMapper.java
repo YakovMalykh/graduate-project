@@ -51,8 +51,7 @@ public abstract class AdsMapper {
     }
 
     public User integerToUser(Integer authorId) {
-        User user = userRepository.findById(authorId.longValue()).get();
-        return user;
+        return userRepository.findById(authorId.longValue()).get();
     }
 
 
@@ -63,7 +62,6 @@ public abstract class AdsMapper {
     @Mapping(target = "image", source = "ads.images")
     @Mapping(target = "authorFirstName", source = "user.firstName")
     @Mapping(target = "authorLastName", source = "user.lastName")
-
     public abstract FullAdsDto adsToFullAdsDto(Ads ads, User user, List<Image> images);
 
     //@Mapping(target = "author", source = "user")

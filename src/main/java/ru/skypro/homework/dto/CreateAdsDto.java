@@ -1,7 +1,6 @@
 package ru.skypro.homework.dto;
 
 import lombok.Data;
-import org.springframework.lang.NonNull;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -9,13 +8,13 @@ import javax.validation.constraints.Positive;
 
 @Data
 public class CreateAdsDto {
-  //  private Integer pk;
-  @NotNull
+    //  private Integer pk;
+    @NotNull
     private String description;
-  //  private String image;
-  @NotNull
-  @Positive
+    //  private String image;
+    @NotNull
+    @Positive
     private Integer price;
-  @NotBlank
+    @NotBlank
     private String title;
 }
