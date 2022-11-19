@@ -2,10 +2,8 @@ package ru.skypro.homework.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.RegisterReqDto;
@@ -17,8 +15,6 @@ import ru.skypro.homework.repositories.UserRepository;
 import ru.skypro.homework.service.UserService;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,38 +25,19 @@ public class UserServiceImpl implements UserService {
 
     private final UserMapper userMapper;
     private final UserRepository userRepository;
+    private final PasswordEncoder encoder;
 
-    public UserServiceImpl(UserMapper userMapper, UserRepository userRepository) {
+    public UserServiceImpl(UserMapper userMapper, UserRepository userRepository, PasswordEncoder encoder) {
         this.userMapper = userMapper;
         this.userRepository = userRepository;
-    }
-
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> userByEmail = userRepository.getUserByEmailIgnoreCase(username);
-        if (userByEmail.isEmpty()) {
-            throw new UsernameNotFoundException(String.format("User '%s' not found", username));
-        }
-        User user = userByEmail.get();
-        return new org.springframework.security.core.userdetails.User(user.getEmail(), user.getPassword(), getAuthority(user));
-    }
-
-
-    /**
-     * из коллекции ролей получить коллекцию GrantedAuthority
-     */
-    private Collection<? extends GrantedAuthority> getAuthority(User user) {
-        // т.к. у нас только по одной роли у каждого юзера, пока метод выглядит так
-        Collection<GrantedAuthority> roles = new ArrayList<>();
-        roles.add(new SimpleGrantedAuthority(user.getRole()));
-        return roles;
+        this.encoder = encoder;
     }
 
     @Override
     public boolean createUser(RegisterReqDto registerReqDto) {
         User user = userMapper.registerReqDtoToUser(registerReqDto);
         userRepository.save(user);
-        log.info("user with username: "+registerReqDto.getUsername()+" is saved");
+        log.info("user with username: " + registerReqDto.getUsername() + " is saved");
         return true;
     }
 
@@ -97,22 +74,22 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    /**
-     * метод не дописан
-     */
     @Override
-    public ResponseEntity<NewPasswordDto> setPassword(NewPasswordDto passwordDto) {
-        // нам нужен пользователь, чтобы проверить текущий пароль тому что лежит в БД
-        // и если совпадает - обновлять пароль
-        Optional<User> optionalUser = userRepository.findById(1L);
-        if (true) {
-            User user = optionalUser.get();
-            userMapper.updatePassword(passwordDto, user);
-            userRepository.save(user);
-            return ResponseEntity.ok(passwordDto);
-        } else {
+    public ResponseEntity<NewPasswordDto> setPassword(NewPasswordDto passwordDto, Authentication auth) {
+        log.info("Сервис установки пароля");
+        Optional<User> optionalUser = userRepository.getUserByEmailIgnoreCase(auth.getName());
+        if (optionalUser.isEmpty()) {
+            log.info("Текущего пользователя не в БД");
             return ResponseEntity.notFound().build();
         }
+        if (!encoder.matches(passwordDto.getCurrentPassword(), optionalUser.get().getPassword())) {
+            log.info("Текущий пароль указан неверно");
+            return ResponseEntity.notFound().build();
+        }
+        User user = optionalUser.get();
+        userMapper.updatePassword(passwordDto, user);
+        userRepository.save(user);
+        return ResponseEntity.ok(passwordDto);
     }
 
     @Override

@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.ResponseWrapperUserDto;
@@ -23,7 +25,9 @@ import ru.skypro.homework.service.UserService;
 public class UserController {
 
     private final UserService userService;
-    @PreAuthorize("hasAuthority('ADMIN')")//здесь прописываем авторити вместо ролей, т.к. у насх прописываются авторити у юзера
+
+    @PreAuthorize("hasAuthority('ADMIN')")
+//здесь прописываем авторити вместо ролей, т.к. у насх прописываются авторити у юзера
     // все что без приставки ROLE_ являетися авторити
     @Operation(
             summary = "выводим всех пользователей",
@@ -57,6 +61,7 @@ public class UserController {
         return userService.updateUser(userDto);
     }
 
+    @PreAuthorize("isAuthenticated()")
     @Operation(
             summary = "устанавливаем пользователю новый пароль",
             responses = {
@@ -71,7 +76,8 @@ public class UserController {
     public ResponseEntity<NewPasswordDto> setPassword(@RequestBody NewPasswordDto passwordDto) {
         log.info("метод установки пользователю нового пароля");
         // метод сервиса еще не дописан
-        return userService.setPassword(passwordDto);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return userService.setPassword(passwordDto, auth);
     }
 
 
