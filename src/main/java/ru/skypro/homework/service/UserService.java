@@ -1,9 +1,7 @@
 package ru.skypro.homework.service;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.Authentication;
 import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.RegisterReqDto;
 import ru.skypro.homework.dto.ResponseWrapperUserDto;
@@ -12,8 +10,7 @@ import ru.skypro.homework.models.User;
 
 import java.util.Optional;
 
-public interface UserService extends UserDetailsService{
-    UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
+public interface UserService {
 
     boolean createUser(RegisterReqDto registerReqDto);
 
@@ -24,7 +21,7 @@ public interface UserService extends UserDetailsService{
     /**
      * метод не дописан
      */
-    ResponseEntity<NewPasswordDto> setPassword(NewPasswordDto currentPassword);
+    ResponseEntity<NewPasswordDto> setPassword(NewPasswordDto currentPassword, Authentication auth);
 
     ResponseEntity<UserDto> getUser(Integer id);
 
