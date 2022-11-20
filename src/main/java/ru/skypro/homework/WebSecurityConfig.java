@@ -64,7 +64,7 @@ public class WebSecurityConfig {
                                 .antMatchers("/ads").permitAll()// здесь точное совпадение
                                 .mvcMatchers("/ads/**", "/users/**").authenticated()//здесь более широкий охват вариантов URL
                 )
-                .cors().disable()
+                .cors().and()
                 .httpBasic(withDefaults());
         return http.build();
     }

@@ -141,18 +141,16 @@ public class AdsServiceImpl implements AdsService {
     @Override
     public ResponseEntity<ResponseWrapperAdsDto> getAllAds() {
         List<Ads> adsList = adsRepository.findAll();
-//        log.info(adsList.toString());
+        ResponseWrapperAdsDto responseWrapperAdsDto = new ResponseWrapperAdsDto();
         if (!adsList.isEmpty()) {
             List<AdsDto> adsDtoList = adsMapper.listAdsToListAdsDto(adsList);
-            ResponseWrapperAdsDto responseWrapperAdsDto = new ResponseWrapperAdsDto();
             responseWrapperAdsDto.setCount(adsDtoList.size());
             responseWrapperAdsDto.setResult(adsDtoList);
             log.info("получили все объявления");
-            return ResponseEntity.ok(responseWrapperAdsDto);
         } else {
             log.info("объявлений не найдено");
-            return ResponseEntity.notFound().build();
         }
+        return ResponseEntity.ok(responseWrapperAdsDto);
     }
 
     @Override
