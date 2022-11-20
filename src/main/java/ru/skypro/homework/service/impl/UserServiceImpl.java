@@ -50,7 +50,7 @@ public class UserServiceImpl implements UserService {
             List<UserDto> listUserDto = userMapper.listUsersToListUserDto(userList);
             ResponseWrapperUserDto responseWrapperUserDto = new ResponseWrapperUserDto();
             responseWrapperUserDto.setCount(listUserDto.size());
-            responseWrapperUserDto.setResult(listUserDto);
+            responseWrapperUserDto.setResults(listUserDto);
             log.info("конвертировали в responseWrapperUserDto и отправляем");
             return ResponseEntity.ok(responseWrapperUserDto);
         } else {
@@ -91,7 +91,7 @@ public class UserServiceImpl implements UserService {
         User user = optionalUser.get();
         user.setPassword(encoder.encode(passwordDto.getNewPassword()));
         //мне кажется здесь не нужен маппер
-      //  userMapper.updatePassword(passwordDto, user);
+        //  userMapper.updatePassword(passwordDto, user);
         userRepository.save(user);
         log.info("Пароль текущего пользователя обновлен");
         //а мы должны открыто возвращать пароль или закодировано?
@@ -120,3 +120,4 @@ public class UserServiceImpl implements UserService {
 
 
 }
+
