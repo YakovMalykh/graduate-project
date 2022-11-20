@@ -60,8 +60,7 @@ public class UserController {
         return userService.updateUser(userDto);
     }
 
-    @PreAuthorize("isAuthenticated()")
-    @Operation(
+     @Operation(
             summary = "устанавливаем пользователю новый пароль",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK",
