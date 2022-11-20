@@ -145,7 +145,7 @@ public class AdsServiceImpl implements AdsService {
         if (!adsList.isEmpty()) {
             List<AdsDto> adsDtoList = adsMapper.listAdsToListAdsDto(adsList);
             responseWrapperAdsDto.setCount(adsDtoList.size());
-            responseWrapperAdsDto.setResult(adsDtoList);
+            responseWrapperAdsDto.setResults(adsDtoList);
             log.info("получили все объявления");
         } else {
             log.info("объявлений не найдено");
@@ -162,7 +162,7 @@ public class AdsServiceImpl implements AdsService {
             List<AdsDto> adsDtoList = adsMapper.listAdsToListAdsDto(adsList);
             ResponseWrapperAdsDto responseWrapperAdsDto = new ResponseWrapperAdsDto();
             responseWrapperAdsDto.setCount(adsDtoList.size());
-            responseWrapperAdsDto.setResult(adsDtoList);
+            responseWrapperAdsDto.setResults(adsDtoList);
             return ResponseEntity.status(HttpStatus.OK).body(responseWrapperAdsDto);
 
         }
@@ -247,7 +247,7 @@ public class AdsServiceImpl implements AdsService {
             List<AdsDto> adsDtoList = adsMapper.listAdsToListAdsDto(adsList);
             ResponseWrapperAdsDto responseWrapperAdsDto = new ResponseWrapperAdsDto();
             responseWrapperAdsDto.setCount(adsDtoList.size());
-            responseWrapperAdsDto.setResult(adsDtoList);
+            responseWrapperAdsDto.setResults(adsDtoList);
             return ResponseEntity.ok(responseWrapperAdsDto);
         } else {
             return ResponseEntity.notFound().build();

@@ -59,7 +59,7 @@ public class CommentServiceImpl implements CommentService {
                 ResponseWrapperAdsCommentDto responseWrapperAdsCommentDto = new ResponseWrapperAdsCommentDto();
 
                 responseWrapperAdsCommentDto.setCount(adsCommentDtoList.size());
-                responseWrapperAdsCommentDto.setResult(adsCommentDtoList);
+                responseWrapperAdsCommentDto.setResults(adsCommentDtoList);
                 log.info("list of comments had been converted into ResponseWrapperAdsCommentDTO");
                 return ResponseEntity.ok(responseWrapperAdsCommentDto);
             }

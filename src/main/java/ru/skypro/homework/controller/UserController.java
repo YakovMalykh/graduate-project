@@ -25,7 +25,7 @@ public class UserController {
 
     private final UserService userService;
 
-    @PreAuthorize("hasAuthority('ADMIN')")
+ @PreAuthorize("hasAuthority('ADMIN')")
 //здесь прописываем авторити вместо ролей, т.к. у насх прописываются авторити у юзера
     // все что без приставки ROLE_ являетися авторити
     @Operation(
@@ -60,8 +60,7 @@ public class UserController {
         return userService.updateUser(userDto);
     }
 
-    @PreAuthorize("isAuthenticated()")
-    @Operation(
+     @Operation(
             summary = "устанавливаем пользователю новый пароль",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK",
