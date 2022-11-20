@@ -64,6 +64,8 @@ public class AdsController {
         }
     }
 
+
+    @Operation(description = "редактирование картинки объявления")
     @PatchMapping(value = "/{adsPk}/images/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Image> updateImage(
             @PathVariable Integer adsPk,
