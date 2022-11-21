@@ -50,16 +50,19 @@ public class CommentServiceImpl implements CommentService {
      */
     @Override
     public ResponseEntity<ResponseWrapperAdsCommentDto> getAllComments(Integer adsPk) {
-        List<Comment> commentList = commentRepository.findAllByAdsId(adsPk.longValue());
-        if (!commentList.isEmpty()) {
-            List<AdsCommentDto> adsCommentDtoList = commentMapper.listCommentsToListAdsCommentDto(commentList);
+        Optional<Ads> adsOptional = adsRepository.findById(adsPk.longValue());
+        if (adsOptional.isPresent()) {
+            List<Comment> commentList = commentRepository.findAllByAdsId(adsOptional.get());
+            if (!commentList.isEmpty()) {
+                List<AdsCommentDto> adsCommentDtoList = commentMapper.listCommentsToListAdsCommentDto(commentList);
 
-            ResponseWrapperAdsCommentDto responseWrapperAdsCommentDto = new ResponseWrapperAdsCommentDto();
+                ResponseWrapperAdsCommentDto responseWrapperAdsCommentDto = new ResponseWrapperAdsCommentDto();
 
-            responseWrapperAdsCommentDto.setCount(adsCommentDtoList.size());
-            responseWrapperAdsCommentDto.setResult(adsCommentDtoList);
-            log.info("list of comments had been converted into ResponseWrapperAdsCommentDTO");
-            return ResponseEntity.ok(responseWrapperAdsCommentDto);
+                responseWrapperAdsCommentDto.setCount(adsCommentDtoList.size());
+                responseWrapperAdsCommentDto.setResults(adsCommentDtoList);
+                log.info("list of comments had been converted into ResponseWrapperAdsCommentDTO");
+                return ResponseEntity.ok(responseWrapperAdsCommentDto);
+            }
         }
         log.info("Any comment doesn't exist");
         return ResponseEntity.notFound().build();
@@ -80,8 +83,11 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public ResponseEntity<AdsCommentDto> updateAdsComment(Integer adsPk, Integer id, AdsCommentDto adsCommentDto) {
+
         Optional<Ads> optionalAds = adsRepository.findById(adsPk.longValue());
+
         Optional<Comment> optionalComment = commentRepository.findById(id.longValue());
+
         if (optionalAds.isPresent() && optionalComment.isPresent()) {
             Comment comment = optionalComment.get();
             commentMapper.updateCommentFromAdsCommentDto(adsCommentDto, comment);
