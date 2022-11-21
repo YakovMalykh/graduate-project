@@ -24,7 +24,7 @@ public abstract class AdsMapper {
     protected ImageRepository imageRepository;
 
     @Mapping(target = "pk", source = "id")
-    @Mapping(target = "image", source = "images")
+//    @Mapping(target = "image", source = "images")
     public abstract AdsDto adsToAdsDto(Ads ads);
 
     public Integer userToInteger(User author) {
@@ -40,7 +40,7 @@ public abstract class AdsMapper {
     }
 
     @Mapping(target = "id", source = "pk")
-    @Mapping(target = "images", source = "image")
+//    @Mapping(target = "images", source = "image")
     public abstract Ads adsDtoToAds(AdsDto adsDto);
 
     public List<Image> stringToImage(String imageStr) { //не понятно, как тут все таки надо возвращать

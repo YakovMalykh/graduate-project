@@ -71,6 +71,7 @@ public class AdsServiceImpl implements AdsService {
 
             ad.setAuthor(user);
             ad.setImages(images);
+            ad.setImage(String.format("/ads/images/%s", images.get(0).getId().toString()));
 
             Ads savedAd = adsRepository.save(ad);
             AdsDto adsDto = adsMapper.adsToAdsDto(savedAd);
@@ -84,7 +85,7 @@ public class AdsServiceImpl implements AdsService {
 
     private Path saveFileIntoFolder(String imageDir, Ads ad, MultipartFile file) throws IOException {
         // вместо ad.getId() м. прописать tittle, на момент вызоыва метода Id еще null
-        Path filePath = Path.of(imageDir, ad.getTitle() + "_" + file.getOriginalFilename() + "." + getExtensions(file.getOriginalFilename()));
+        Path filePath = Path.of(imageDir, ad.getTitle() + "_" + getFileName(file.getOriginalFilename()) + "." + getExtensions(file.getOriginalFilename()));
         Files.createDirectories(filePath.getParent());
         Files.deleteIfExists(filePath);
 
@@ -136,6 +137,11 @@ public class AdsServiceImpl implements AdsService {
     private String getExtensions(String fileName) {
         log.info("method getExtensions started");
         return fileName.substring(fileName.lastIndexOf(".") + 1);
+    }
+
+    private String getFileName(String fileName) {
+        log.info("method getFileName started");
+        return fileName.substring(0, fileName.indexOf("."));
     }
 
     @Override

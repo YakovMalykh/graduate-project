@@ -13,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,7 +30,6 @@ import java.io.IOException;
 import java.util.List;
 
 @Slf4j
-
 @RestController
 @RequestMapping(value = "/ads")
 @CrossOrigin(value = "http://localhost:3000")
@@ -120,17 +118,13 @@ public class AdsController {
 
             // здесь из Authentication достаем юзернейм и по нему достаем все объяыления этого пользователя
             // зачем нам все эти параметры, елси мы достаем нужные нам данные из Authentication? можем мы их убрать и оставть только Authentication?
-            @Parameter(description = "true/false") @RequestParam(required = false) Boolean authenticated,
-            @Parameter(description = "authorities[0].authority") @RequestParam(required = false) String authority,
-            @Parameter(description = "credentials") @RequestParam(required = false) Object credentials,
-            @Parameter(description = "details") @RequestParam(required = false) Object details,
-            @Parameter(description = "principal") @RequestParam(required = false) Object principal
+            Authentication authentication
 
     ) {
 
         log.info("метод получения всех объявлений данного пользователя");
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return adsService.getAdsMe(auth);
+//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        return adsService.getAdsMe(authentication);
     }
 
     // USER может править только свои объявления, ADMIN может править объявления других пользователей
