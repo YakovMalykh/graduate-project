@@ -43,16 +43,6 @@ public class WebSecurityConfig {
         return daoAuthenticationProvider;
     }
 
-//    @Bean
-//    public InMemoryUserDetailsManager userDetailsService() {
-//        UserDetails user = User.withDefaultPasswordEncoder()
-//                .username("user@gmail.com")
-//                .password("password")
-//                .roles("USER")
-//                .build();
-//        return new InMemoryUserDetailsManager(user);
-//    }
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -60,7 +50,7 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests((authz) ->
                         authz
                                 .mvcMatchers(AUTH_WHITELIST).permitAll()
-                                .antMatchers("/ads").permitAll()// здесь точное совпадение
+                                .antMatchers("/ads","/ads/images/**").permitAll()// здесь точное совпадение
                                 .mvcMatchers("/ads/**", "/users/**").authenticated()//здесь более широкий охват вариантов URL
                 )
                 .cors().and()

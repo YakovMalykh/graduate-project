@@ -24,14 +24,14 @@ public abstract class AdsMapper {
     protected ImageRepository imageRepository;
 
     @Mapping(target = "pk", source = "id")
-    @Mapping(target = "image", source = "images")
+//    @Mapping(target = "image", source = "images")
     public abstract AdsDto adsToAdsDto(Ads ads);
 
     public Integer userToInteger(User author) {
         return Math.toIntExact(author.getId());
     }
 
-    public String imageToString(List<Image> images) {
+      public String imageToString(List<Image> images) {
         String imageStr = "";
         if (!images.isEmpty()) {
             imageStr += images.get(0).getFilePath();
@@ -40,7 +40,7 @@ public abstract class AdsMapper {
     }
 
     @Mapping(target = "id", source = "pk")
-    @Mapping(target = "images", source = "image")
+//    @Mapping(target = "images", source = "image")
     public abstract Ads adsDtoToAds(AdsDto adsDto);
 
     public List<Image> stringToImage(String imageStr) { //не понятно, как тут все таки надо возвращать
@@ -59,7 +59,7 @@ public abstract class AdsMapper {
     public abstract Ads createAdsDtoToAds(CreateAdsDto createAdsDto);
 
     @Mapping(target = "pk", source = "ads.id")
-    @Mapping(target = "image", source = "ads.images")
+  //  @Mapping(target = "image", source = "ads.images")
     @Mapping(target = "authorFirstName", source = "user.firstName")
     @Mapping(target = "authorLastName", source = "user.lastName")
     public abstract FullAdsDto adsToFullAdsDto(Ads ads, User user, List<Image> images);

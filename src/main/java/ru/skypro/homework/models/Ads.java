@@ -30,6 +30,9 @@ public class Ads {
     @Column(name = "ads_price")
     private Integer price;
 
+    @Column(name = "ads_image")
+    private String image;
+
     @OneToMany(mappedBy = "ads")
     @JsonIgnore
     private List<Image> images;
