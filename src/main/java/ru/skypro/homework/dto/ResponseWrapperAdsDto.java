@@ -6,5 +6,5 @@ import java.util.List;
 @Data
 public class ResponseWrapperAdsDto {
     private Integer count;
-    private List<AdsDto> result;
+    private List<AdsDto> results;
 }

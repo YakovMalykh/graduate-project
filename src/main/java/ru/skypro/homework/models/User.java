@@ -4,7 +4,6 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import ru.skypro.homework.dto.Role;
 
 import javax.persistence.*;
 import java.util.Objects;
@@ -12,7 +11,7 @@ import java.util.Objects;
 @Entity
 @Getter
 @Setter
-@ToString
+@ToString(exclude = {"password"})
 @RequiredArgsConstructor
 @Table(name = "users")
 public class User {
@@ -38,18 +37,18 @@ public class User {
     private String password;
 
     @Column(name = "user_role")
-    private Role role;
+    private String role;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
-        return id.equals(user.id) && firstName.equals(user.firstName) && lastName.equals(user.lastName) && email.equals(user.email) && Objects.equals(phone, user.phone) && Objects.equals(password, user.password) && role == user.role;
+        return id.equals(user.id) && firstName.equals(user.firstName) && lastName.equals(user.lastName) && email.equals(user.email) && phone.equals(user.phone) && role.equals(user.role);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, firstName, lastName, email, phone, password, role);
+        return Objects.hash(id, firstName, lastName, email, phone, role);
     }
 }

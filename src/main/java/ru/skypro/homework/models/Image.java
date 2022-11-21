@@ -1,20 +1,17 @@
 package ru.skypro.homework.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 import javax.persistence.*;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Objects;
 
 @Entity
 @Getter
 @Setter
-@ToString
+//@ToString
 @RequiredArgsConstructor
 @Table(name = "images")
 public class Image {
@@ -22,7 +19,6 @@ public class Image {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
-
     @Column(name = "file_path")
     private String filePath;
     @Column(name = "file_size")
@@ -49,5 +45,15 @@ public class Image {
         int result = Objects.hash(id, filePath, fileSize, mediaType, ads);
         result = 31 * result + Arrays.hashCode(prewiew);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Image{" +
+                "id=" + id +
+                ", filePath='" + filePath + '\'' +
+                ", fileSize=" + fileSize +
+                ", mediaType='" + mediaType + '\'' +
+                '}';
     }
 }

@@ -30,3 +30,15 @@ CREATE TABLE IF NOT EXISTS comment
     comment_created TIMESTAMP NOT NULL,
     comment_text TEXT NOT NULL
     );
+
+-- changeset sascvotch:2
+
+CREATE TABLE IF NOT EXISTS avatars
+(
+    avatar_id   SERIAL PRIMARY KEY,
+    author_id BIGINT REFERENCES users (user_id),
+    file_path VARCHAR (250) NOT NULL,
+    file_size BIGINT NOT NULL,
+    media_type VARCHAR (250) NOT NULL,
+    prewiew OID NOT NULL
+    );
