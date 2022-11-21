@@ -31,7 +31,7 @@ public abstract class AdsMapper {
         return Math.toIntExact(author.getId());
     }
 
-    public String imageToString(List<Image> images) {
+      public String imageToString(List<Image> images) {
         String imageStr = "";
         if (!images.isEmpty()) {
             imageStr += images.get(0).getFilePath();
@@ -59,7 +59,7 @@ public abstract class AdsMapper {
     public abstract Ads createAdsDtoToAds(CreateAdsDto createAdsDto);
 
     @Mapping(target = "pk", source = "ads.id")
-    @Mapping(target = "image", source = "ads.images")
+  //  @Mapping(target = "image", source = "ads.images")
     @Mapping(target = "authorFirstName", source = "user.firstName")
     @Mapping(target = "authorLastName", source = "user.lastName")
     public abstract FullAdsDto adsToFullAdsDto(Ads ads, User user, List<Image> images);
