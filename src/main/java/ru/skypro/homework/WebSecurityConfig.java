@@ -23,7 +23,7 @@ public class WebSecurityConfig {
             "/swagger-ui.html",
             "/v3/api-docs",
             "/webjars/**",
-            "/login", "/register"
+            "/login", "/register","/images/**"
     };
 
     public WebSecurityConfig(UserDetailsService userDetailsService) {
@@ -50,7 +50,7 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests((authz) ->
                         authz
                                 .mvcMatchers(AUTH_WHITELIST).permitAll()
-                                .antMatchers("/ads","/ads/images/**").permitAll()// здесь точное совпадение
+                                .antMatchers("/ads").permitAll()// здесь точное совпадение
                                 .mvcMatchers("/ads/**", "/users/**").authenticated()//здесь более широкий охват вариантов URL
                 )
                 .cors().and()
