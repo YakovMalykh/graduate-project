@@ -84,6 +84,9 @@ public class AdsServiceImpl implements AdsService {
         return ResponseEntity.notFound().build();
     }
 
+    /**
+     * нужен ли нам этот метод? зачем нам файл сохранять в папку?
+     */
     private Path saveFileIntoFolder(String imageDir, Ads ad, MultipartFile file) throws IOException {
         // вместо ad.getId() м. прописать tittle, на момент вызоыва метода Id еще null
         Path filePath = Path.of(imageDir, ad.getTitle() + "_" + getFileName(file.getOriginalFilename()) + "." + getExtensions(file.getOriginalFilename()));
