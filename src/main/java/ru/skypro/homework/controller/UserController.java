@@ -7,9 +7,9 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import ru.skypro.homework.dto.CreateUserDto;
 import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.ResponseWrapperUserDto;
 import ru.skypro.homework.dto.UserDto;
@@ -39,9 +39,9 @@ public class UserController {
             }
     )
     @GetMapping("/me")
-    public ResponseEntity<ResponseWrapperUserDto> getUsers() {
-        log.info("метод вывода списка всех пользователей");
-        return userService.getUsers();
+    public ResponseEntity<UserDto> getUsers(Authentication auth) {
+        log.info("метод вывода текущего пользователя");
+        return userService.getUsersMe( auth);
     }
 
     @Operation(
@@ -55,9 +55,9 @@ public class UserController {
             }
     )
     @PatchMapping("/me")
-    public ResponseEntity<UserDto> updateUser(@RequestBody UserDto userDto) {
+    public ResponseEntity<UserDto> updateUser(@RequestBody CreateUserDto userDto, Authentication auth) {
         log.info("метод обновления существующего пользователя");
-        return userService.updateUser(userDto);
+        return userService.updateUser(userDto, auth);
     }
 
     @Operation(
