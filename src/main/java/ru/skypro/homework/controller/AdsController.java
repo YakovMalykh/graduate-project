@@ -52,12 +52,10 @@ public class AdsController {
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<AdsDto> addAds(
 //         @Valid    @Parameter(schema=@Schema(type = "string", format="binary"))
-            @RequestPart("properties") CreateAdsDto createAdsDto, @RequestPart("image") MultipartFile image
+            @RequestPart("properties") CreateAdsDto createAdsDto, @RequestPart("image") List<MultipartFile> imageList
     ) {
         log.info("метод добавления нового объявления");
         try {
-            ArrayList<MultipartFile> imageList = new ArrayList<>();// попробовал передать только один файл
-            imageList.add(image);
             return adsService.addAdsToDb(createAdsDto, imageList);
         } catch (IOException e) {
             throw new RuntimeException(e);
