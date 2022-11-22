@@ -55,7 +55,7 @@ public class UserController {
             }
     )
     @PatchMapping("/me")
-    public ResponseEntity<UserDto> updateUser(@RequestBody CreateUserDto userDto, Authentication auth) {
+    public ResponseEntity<UserDto> updateUser(@RequestBody UserDto userDto, Authentication auth) {
         log.info("метод обновления существующего пользователя");
         return userService.updateUser(userDto, auth);
     }
