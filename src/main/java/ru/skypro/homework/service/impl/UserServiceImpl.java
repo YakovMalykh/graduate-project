@@ -5,10 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import ru.skypro.homework.dto.NewPasswordDto;
-import ru.skypro.homework.dto.RegisterReqDto;
-import ru.skypro.homework.dto.ResponseWrapperUserDto;
-import ru.skypro.homework.dto.UserDto;
+import ru.skypro.homework.dto.*;
 import ru.skypro.homework.mappers.UserMapper;
 import ru.skypro.homework.models.User;
 import ru.skypro.homework.repositories.UserRepository;
@@ -59,20 +56,42 @@ public class UserServiceImpl implements UserService {
         }
 
     }
-
     @Override
-    public ResponseEntity<UserDto> updateUser(UserDto userDto) {
-        Optional<User> optionalUser = userRepository.findById(userDto.getId().longValue());
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            userMapper.updateUserFromUserDto(userDto, user);
+    public ResponseEntity<UserDto> getUsersMe(Authentication auth) {
+        log.info("Сервис получения текущего юзера");
+        Optional<User> optionalUser = userRepository.getUserByEmailIgnoreCase(auth.getName());
+        if (optionalUser.isEmpty()) {
+            log.info("Текущего пользователя не в БД");
+            return ResponseEntity.notFound().build();
+        }
+
+            UserDto userDto = userMapper.userToUserDto(optionalUser.get());
+           // ResponseWrapperUserDto responseWrapperUserDto = new ResponseWrapperUserDto();
+          //  responseWrapperUserDto.setCount(listUserDto.size());
+          //  responseWrapperUserDto.setResults(listUserDto);
+            log.info("конвертировали в UserDto и отправляем");
+            return ResponseEntity.ok(userDto);
+
+
+    }
+    @Override
+    public ResponseEntity<UserDto> updateUser(CreateUserDto userDto, Authentication auth) {
+        log.info("Сервис обновления юзера");
+        Optional<User> optionalUser = userRepository.getUserByEmailIgnoreCase(auth.getName());
+        if (optionalUser.isEmpty()) {
+            log.info("Текущего пользователя не в БД");
+            return ResponseEntity.notFound().build();
+        }
+        User user = optionalUser.get();
+          //  userMapper.updateUserFromUserDto(userDto, user);
+          user.setFirstName(userDto.getFirstName());
+          user.setLastName(userDto.getLastName());
+          user.setPhone(userDto.getPhone());
             userRepository.save(user);
             log.info("fields of user with id: " + user.getId() + " updated");
-            return ResponseEntity.ok(userDto);
-        } else {
-            return ResponseEntity.status(204).build();
-        }
-    }
+        //userMapper.userToUserDto(user);
+            return ResponseEntity.ok( userMapper.userToUserDto(user));
+           }
 
     @Override
     public ResponseEntity<NewPasswordDto> setPassword(NewPasswordDto passwordDto, Authentication auth) {
