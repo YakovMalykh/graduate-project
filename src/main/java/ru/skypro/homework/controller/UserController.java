@@ -7,7 +7,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.CreateUserDto;
@@ -41,7 +40,7 @@ public class UserController {
     )
     @GetMapping("/me")
     public ResponseEntity<UserDto> getUsers(Authentication auth) {
-        log.info("метод вывода списка всех пользователей");
+        log.info("метод вывода текущего пользователя");
         return userService.getUsersMe( auth);
     }
 
