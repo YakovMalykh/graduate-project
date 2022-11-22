@@ -13,7 +13,7 @@ public interface UserService {
 
     ResponseEntity<ResponseWrapperUserDto> getUsers();
 
-    ResponseEntity<UserDto> updateUser(CreateUserDto createUserDto, Authentication auth);
+    ResponseEntity<UserDto> updateUser(UserDto createUserDto, Authentication auth);
 
     /**
      * метод не дописан

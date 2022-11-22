@@ -56,6 +56,7 @@ public class UserServiceImpl implements UserService {
         }
 
     }
+
     @Override
     public ResponseEntity<UserDto> getUsersMe(Authentication auth) {
         log.info("Сервис получения текущего юзера");
@@ -65,17 +66,18 @@ public class UserServiceImpl implements UserService {
             return ResponseEntity.notFound().build();
         }
 
-            UserDto userDto = userMapper.userToUserDto(optionalUser.get());
-           // ResponseWrapperUserDto responseWrapperUserDto = new ResponseWrapperUserDto();
-          //  responseWrapperUserDto.setCount(listUserDto.size());
-          //  responseWrapperUserDto.setResults(listUserDto);
-            log.info("конвертировали в UserDto и отправляем");
-            return ResponseEntity.ok(userDto);
+        UserDto userDto = userMapper.userToUserDto(optionalUser.get());
+        // ResponseWrapperUserDto responseWrapperUserDto = new ResponseWrapperUserDto();
+        //  responseWrapperUserDto.setCount(listUserDto.size());
+        //  responseWrapperUserDto.setResults(listUserDto);
+        log.info("конвертировали в UserDto и отправляем");
+        return ResponseEntity.ok(userDto);
 
 
     }
+
     @Override
-    public ResponseEntity<UserDto> updateUser(CreateUserDto userDto, Authentication auth) {
+    public ResponseEntity<UserDto> updateUser(UserDto userDto, Authentication auth) {
         log.info("Сервис обновления юзера");
         Optional<User> optionalUser = userRepository.getUserByEmailIgnoreCase(auth.getName());
         if (optionalUser.isEmpty()) {
@@ -83,15 +85,11 @@ public class UserServiceImpl implements UserService {
             return ResponseEntity.notFound().build();
         }
         User user = optionalUser.get();
-          //  userMapper.updateUserFromUserDto(userDto, user);
-          user.setFirstName(userDto.getFirstName());
-          user.setLastName(userDto.getLastName());
-          user.setPhone(userDto.getPhone());
-            userRepository.save(user);
-            log.info("fields of user with id: " + user.getId() + " updated");
-        //userMapper.userToUserDto(user);
-            return ResponseEntity.ok( userMapper.userToUserDto(user));
-           }
+        userMapper.updateUserFromUserDto(userDto, user);
+        userRepository.save(user);
+        log.info("fields of user with id: " + user.getId() + " updated");
+        return ResponseEntity.ok(userMapper.userToUserDto(user));
+    }
 
     @Override
     public ResponseEntity<NewPasswordDto> setPassword(NewPasswordDto passwordDto, Authentication auth) {
@@ -109,11 +107,8 @@ public class UserServiceImpl implements UserService {
         }
         User user = optionalUser.get();
         user.setPassword(encoder.encode(passwordDto.getNewPassword()));
-        //мне кажется здесь не нужен маппер
-        //  userMapper.updatePassword(passwordDto, user);
         userRepository.save(user);
         log.info("Пароль текущего пользователя обновлен");
-        //а мы должны открыто возвращать пароль или закодировано?
         return ResponseEntity.ok(passwordDto);
     }
 
