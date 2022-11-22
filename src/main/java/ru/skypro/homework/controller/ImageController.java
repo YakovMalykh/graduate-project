@@ -13,7 +13,7 @@ import ru.skypro.homework.service.ImageService;
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/ads/images")
+@RequestMapping("/images")
 public class ImageController {
 
     private final ImageService imageService;

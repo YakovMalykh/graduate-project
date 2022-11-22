@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -51,11 +52,12 @@ public class AdsController {
     @PostMapping(value = "/", produces = MediaType.APPLICATION_JSON_VALUE, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<AdsDto> addAds(
 //         @Valid    @Parameter(schema=@Schema(type = "string", format="binary"))
-            @RequestPart("properties") CreateAdsDto createAdsDto, @RequestPart("image") List<MultipartFile> imageList
-
+            @RequestPart("properties") CreateAdsDto createAdsDto, @RequestPart("image") MultipartFile image
     ) {
         log.info("метод добавления нового объявления");
         try {
+            ArrayList<MultipartFile> imageList = new ArrayList<>();// попробовал передать только один файл
+            imageList.add(image);
             return adsService.addAdsToDb(createAdsDto, imageList);
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -167,7 +169,7 @@ public class AdsController {
         return adsService.deleteAds(Long.valueOf(id));
     }
 
-    @Operation(summary = "доавляем новый комментарий к обявлению",
+    @Operation(summary = "добавляем новый комментарий к объявлению",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK",
                             content = @Content(schema = @Schema(implementation = AdsCommentDto.class))),

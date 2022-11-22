@@ -71,10 +71,11 @@ public class AdsServiceImpl implements AdsService {
 
             ad.setAuthor(user);
             ad.setImages(images);
-            ad.setImage(String.format("/ads/images/%s", images.get(0).getId().toString()));
+            ad.setImage(String.format("/images/%s", images.get(0).getId().toString()));
 
             Ads savedAd = adsRepository.save(ad);
             AdsDto adsDto = adsMapper.adsToAdsDto(savedAd);
+            log.info(adsDto.toString());
 
             log.info("new ad is saved to DB! Id: " + savedAd.getId() + ", author: " + savedAd.getAuthor());
             return ResponseEntity.ok(adsDto);
@@ -152,7 +153,7 @@ public class AdsServiceImpl implements AdsService {
             List<AdsDto> adsDtoList = adsMapper.listAdsToListAdsDto(adsList);
             responseWrapperAdsDto.setCount(adsDtoList.size());
             responseWrapperAdsDto.setResults(adsDtoList);
-            log.info("получили все объявления");
+            log.info("получили все объявления " + responseWrapperAdsDto.toString());
         } else {
             log.info("объявлений не найдено");
         }
@@ -164,15 +165,18 @@ public class AdsServiceImpl implements AdsService {
         String username = auth.getName();
         User user = userRepository.getUserByEmailIgnoreCase(username).orElseThrow();
         List<Ads> adsList = adsRepository.findAllByAuthor_Id(user.getId()); //потом заменим на автора из контекста
+        ResponseWrapperAdsDto responseWrapperAdsDto = new ResponseWrapperAdsDto();
         if (!adsList.isEmpty()) {
             List<AdsDto> adsDtoList = adsMapper.listAdsToListAdsDto(adsList);
-            ResponseWrapperAdsDto responseWrapperAdsDto = new ResponseWrapperAdsDto();
             responseWrapperAdsDto.setCount(adsDtoList.size());
             responseWrapperAdsDto.setResults(adsDtoList);
+
+            log.info("получили объявления обратившегося пользователя" + responseWrapperAdsDto.toString());//удалить позже...
+
             return ResponseEntity.status(HttpStatus.OK).body(responseWrapperAdsDto);
 
         }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.ok(responseWrapperAdsDto);
     }
 
     @Override
