@@ -17,7 +17,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
-import ru.skypro.homework.models.Image;
 import ru.skypro.homework.service.AdsService;
 import ru.skypro.homework.service.CommentService;
 import ru.skypro.homework.service.ImageService;
@@ -27,7 +26,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -63,15 +61,7 @@ public class AdsController {
     }
 
 
-    @Operation(description = "редактирование картинки объявления")
-    @PatchMapping(value = "/{adsPk}/images/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<Image> updateImage(
-            @PathVariable Integer adsPk,
-            @PathVariable Integer id,
-            @RequestBody MultipartFile file
-    ) {
-        return imageService.updateImage(adsPk.longValue(), id.longValue(), file);
-    }
+
 
 
     @Operation(summary = "получаем список всех объявлений",
@@ -115,15 +105,9 @@ public class AdsController {
             })
     @GetMapping("/me")
     public ResponseEntity<ResponseWrapperAdsDto> getAdsMe(
-
-            // здесь из Authentication достаем юзернейм и по нему достаем все объяыления этого пользователя
-            // зачем нам все эти параметры, елси мы достаем нужные нам данные из Authentication? можем мы их убрать и оставть только Authentication?
             Authentication authentication
-
     ) {
-
         log.info("метод получения всех объявлений данного пользователя");
-//        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return adsService.getAdsMe(authentication);
     }
 
@@ -143,11 +127,21 @@ public class AdsController {
     // => затем возвращается ответ в контроллер и здесь у нас не проходит проверка прописанная в @PostAuthorize, то в этом случае все изменения внесенные в БД откатятся?
     public ResponseEntity<AdsDto> updateAds(
             @Parameter(description = "передаем ID объявления") @PathVariable Integer id,
-            @RequestBody AdsDto adsDto,
-            Authentication authentication
+            @RequestBody AdsDto adsDto
+//            Authentication authentication
     ) {
         log.info("метод обновления объявления");
         return adsService.updateAds(id, adsDto);
+    }
+
+    @PreAuthorize("@adsServiceImpl.getAds(#id).body.email.equals(authentication.principal.username) or hasAuthority('ADMIN')")
+    @Operation(description = "редактирование картинки объявления")
+    @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Void> updateImage(
+            @PathVariable Integer id,
+            @RequestBody MultipartFile file
+    ) {
+        return imageService.updateImage(id.longValue(), file);
     }
 
     // USER может удалять только свои объявления, ADMIN может удалять объявления других пользователей

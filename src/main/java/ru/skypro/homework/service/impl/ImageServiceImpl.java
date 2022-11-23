@@ -30,27 +30,32 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
-    public ResponseEntity<Image> updateImage(Long adsId, Long imageId, MultipartFile file) {
+    public ResponseEntity<Void> updateImage(Long adsId, MultipartFile file) {
+//        log.info("file "+ file.getSize()+" "+file.getContentType());
         Optional<Ads> optionalAds = adsRepository.findById(adsId);
-        if (!optionalAds.isEmpty()) {
+        if (optionalAds.isPresent()) {
             Ads ads = optionalAds.get();
-            try {
-                Image image = adsMapper.imageToFile(file);
-                image.setId(imageId);
-                image.setAds(ads);
-                ads.getImages().set(0, image);
-                adsRepository.save(ads);
-                imageRepository.save(image);
-                log.info("success, image has been updated");
-                return ResponseEntity.ok(image);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            String imagesFilePath = ads.getImage();
+            Optional<Image> optionalImage = imageRepository.findImageByFilePath(imagesFilePath);
+            if (optionalImage.isPresent()) {
+                Image image = optionalImage.get();
+                log.info("до " + image);
+                try {
+                    Image imageUpdated = adsMapper.fileToImage(file, image);
+                    Image save = imageRepository.save(imageUpdated);
+                    log.info("после " + save);
 
-        } else {
-            log.info("Ads doesn't exists");
-            return ResponseEntity.status(204).build();
+                    log.info("картинка " + image.getId() + " в объявлении " + ads.getId() + "обновлена");
+                    return ResponseEntity.ok().build();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            log.info("картинка с полем filePath: " + imagesFilePath + " не найдена");
+            return ResponseEntity.notFound().build();
         }
+        log.info("Ads doesn't exists");
+        return ResponseEntity.notFound().build();
     }
 
     @Override
