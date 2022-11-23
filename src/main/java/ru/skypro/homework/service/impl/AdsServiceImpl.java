@@ -167,7 +167,7 @@ public class AdsServiceImpl implements AdsService {
     public ResponseEntity<ResponseWrapperAdsDto> getAdsMe(Authentication auth) {
         String username = auth.getName();
         User user = userRepository.getUserByEmailIgnoreCase(username).orElseThrow();
-        List<Ads> adsList = adsRepository.findAllByAuthor_Id(user.getId()); //потом заменим на автора из контекста
+        List<Ads> adsList = adsRepository.findAllByAuthor_Id(user.getId());
         ResponseWrapperAdsDto responseWrapperAdsDto = new ResponseWrapperAdsDto();
         if (!adsList.isEmpty()) {
             List<AdsDto> adsDtoList = adsMapper.listAdsToListAdsDto(adsList);
@@ -178,8 +178,16 @@ public class AdsServiceImpl implements AdsService {
 
             return ResponseEntity.status(HttpStatus.OK).body(responseWrapperAdsDto);
 
+        } else {
+            log.info("У пользователя " + username + " еще нет объявлений");
+            // заполняю responseWrapper пустым AdsDto иначе фронт не отображает страницу юзера, у которого нет объявлений
+            // в консоли фронта ошибка Uncaught TypeError: Cannot read properties of undefined (reading 'length') или
+            // ругается на обращение к null, хотя в Swagger требование что мы должны вернуть 404 ошибку
+            ArrayList<AdsDto> defaultListEmptyAdsDto = new ArrayList<>(List.of(new AdsDto()));
+            responseWrapperAdsDto.setCount(0);
+            responseWrapperAdsDto.setResults(defaultListEmptyAdsDto);
+            return ResponseEntity.ok(responseWrapperAdsDto);
         }
-        return ResponseEntity.ok(responseWrapperAdsDto);
     }
 
     @Override
