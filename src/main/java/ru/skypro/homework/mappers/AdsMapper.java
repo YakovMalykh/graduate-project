@@ -77,10 +77,10 @@ public abstract class AdsMapper {
 
     public abstract List<AdsDto> listAdsToListAdsDto(List<Ads> adsList);
 
-    @Mapping(target = "filePath", expression = "java(file.getResource().getFilename())")
-    @Mapping(target = "fileSize", expression = "java((int) (file.getSize()))")
+    @Mapping(target = "fileSize", expression = "java(file.getSize())")
     @Mapping(target = "mediaType", expression = "java(file.getContentType())")
-    @Mapping(target = "id", ignore = true)
     @Mapping(target = "prewiew", expression = "java(file.getBytes())")
-    public abstract Image imageToFile(MultipartFile file) throws IOException;
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    public abstract Image fileToImage(MultipartFile file, @MappingTarget Image image) throws IOException;
+
 }
