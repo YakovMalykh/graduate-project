@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
 import java.util.List;
 
 @Slf4j
@@ -53,11 +52,7 @@ public class AdsController {
             @RequestPart("properties") CreateAdsDto createAdsDto, @RequestPart("image") List<MultipartFile> imageList
     ) {
         log.info("метод добавления нового объявления");
-        try {
-            return adsService.addAdsToDb(createAdsDto, imageList);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return adsService.addAdsToDb(createAdsDto, imageList);
     }
 
     @Operation(summary = "получаем список всех объявлений",
@@ -71,7 +66,6 @@ public class AdsController {
     @GetMapping
     public ResponseEntity<ResponseWrapperAdsDto> getAllAds() {
         log.info("метод получения всех объявлений");
-
         return adsService.getAllAds();
     }
 
