@@ -60,10 +60,6 @@ public class AdsController {
         }
     }
 
-
-
-
-
     @Operation(summary = "получаем список всех объявлений",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK",
@@ -139,7 +135,7 @@ public class AdsController {
     @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> updateImage(
             @PathVariable Integer id,
-            @RequestBody MultipartFile file
+            @RequestPart(value = "image") MultipartFile file
     ) {
         return imageService.updateImage(id.longValue(), file);
     }
