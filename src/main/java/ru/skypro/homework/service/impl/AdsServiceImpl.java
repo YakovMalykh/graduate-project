@@ -245,13 +245,14 @@ public class AdsServiceImpl implements AdsService {
 
 
     @Override
-    public ResponseEntity<AdsDto> updateAds(Integer adsPk, AdsDto adsDto) {
+    public ResponseEntity<AdsDto> updateAds(Integer adsPk, CreateAdsDto createAdsDto) {
         Optional<Ads> optionalAds = adsRepository.findById(adsPk.longValue());
 
         if (optionalAds.isPresent()) {
             Ads ads = optionalAds.get();
-            adsMapper.updateAdsFromAdsDto(adsDto, ads);
-            adsRepository.save(ads);
+            adsMapper.updateAdsFromCreateAdsDto(createAdsDto,ads);// обновляем поля объявления
+            Ads savedAndUpdatedAd = adsRepository.save(ads);// сохраняем обновленное объявл-е
+            AdsDto adsDto = adsMapper.adsToAdsDto(savedAndUpdatedAd);// конвертируем объявление в AdsDto, чтобы вернуть фронту
             log.info("success, ads with id: " + adsPk + "has been updated");
             return ResponseEntity.ok(adsDto);
         } else {

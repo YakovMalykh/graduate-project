@@ -123,11 +123,10 @@ public class AdsController {
     // => затем возвращается ответ в контроллер и здесь у нас не проходит проверка прописанная в @PostAuthorize, то в этом случае все изменения внесенные в БД откатятся?
     public ResponseEntity<AdsDto> updateAds(
             @Parameter(description = "передаем ID объявления") @PathVariable Integer id,
-            @RequestBody AdsDto adsDto
-//            Authentication authentication
+            @RequestBody CreateAdsDto createAdsDto
     ) {
         log.info("метод обновления объявления");
-        return adsService.updateAds(id, adsDto);
+        return adsService.updateAds(id, createAdsDto);
     }
 
     @PreAuthorize("@adsServiceImpl.getAds(#id).body.email.equals(authentication.principal.username) or hasAuthority('ADMIN')")

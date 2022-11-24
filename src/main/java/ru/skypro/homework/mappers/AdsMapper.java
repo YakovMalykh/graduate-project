@@ -74,6 +74,9 @@ public abstract class AdsMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     public abstract void updateAdsFromAdsDto(AdsDto adsDto, @MappingTarget Ads ads);
 
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    public abstract void updateAdsFromCreateAdsDto(CreateAdsDto createAdsDto, @MappingTarget Ads ads);
+
 
     public abstract List<AdsDto> listAdsToListAdsDto(List<Ads> adsList);
 

@@ -17,7 +17,7 @@ public interface AdsService {
 
     ResponseEntity<FullAdsDto> getAds(Integer adsPk);
 
-    ResponseEntity<AdsDto> updateAds(Integer adsPk, AdsDto adsDto);
+    ResponseEntity<AdsDto> updateAds(Integer adsPk, CreateAdsDto createAdsDto);
 
     ResponseEntity<ResponseWrapperAdsDto> getAdsMe(Authentication auth);
 
