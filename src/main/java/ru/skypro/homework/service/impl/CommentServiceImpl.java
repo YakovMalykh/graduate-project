@@ -56,7 +56,6 @@ public class CommentServiceImpl implements CommentService {
     private AdsCommentDto fillingFieldsOfAdsCommentDto(AdsCommentDto adsCommentDto, Ads ad, User author) {
         adsCommentDto.setPk(ad.getId().intValue());
         adsCommentDto.setAuthor(author.getId().intValue());
-        adsCommentDto.setText(adsCommentDto.getText());
         adsCommentDto.setCreatedAt(LocalDateTime.now());
 
         log.info("adsCommentDto has been filled ");
@@ -80,10 +79,12 @@ public class CommentServiceImpl implements CommentService {
                 responseWrapperAdsCommentDto.setResults(adsCommentDtoList);
                 log.info("list of comments had been converted into ResponseWrapperAdsCommentDTO");
                 return ResponseEntity.ok(responseWrapperAdsCommentDto);
+            } else {
+                log.info("Any comment doesn't exist");
+                return ResponseEntity.notFound().build();
             }
         }
-        log.info("Any comment doesn't exist");
-        return ResponseEntity.notFound().build();
+        return null;
     }
 
     @Override
@@ -99,19 +100,19 @@ public class CommentServiceImpl implements CommentService {
         }
     }
 
-    @Override
+    @Override// нужно понять что нам придет с фронта, если как и при создании комментария AdsCommentDto заполнен только text, то все ок
     public ResponseEntity<AdsCommentDto> updateAdsComment(Integer adsPk, Integer id, AdsCommentDto adsCommentDto) {
-
         Optional<Ads> optionalAds = adsRepository.findById(adsPk.longValue());
-
         Optional<Comment> optionalComment = commentRepository.findById(id.longValue());
 
         if (optionalAds.isPresent() && optionalComment.isPresent()) {
             Comment comment = optionalComment.get();
+            adsCommentDto.setCreatedAt(LocalDateTime.now());
             commentMapper.updateCommentFromAdsCommentDto(adsCommentDto, comment);
             commentRepository.save(comment);
+            AdsCommentDto commentDtoForResponse = commentMapper.commentToAdsCommentDto(comment);
             log.info("success, comment with id: " + id + "has been updated");
-            return ResponseEntity.ok(adsCommentDto);
+            return ResponseEntity.ok(commentDtoForResponse);
         } else {
             log.info("Ads or Comment doesn't exists");
             return ResponseEntity.status(204).build();

@@ -173,7 +173,7 @@ public class AdsController {
         return commentService.addCommentToDb(adsPk, adsCommentDto, authorUsername);
     }
 
-    @Operation(summary = "получаем список всех комментариев у данного обяъвления",
+    @Operation(summary = "получаем список всех комментариев у данного объявления",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -187,7 +187,7 @@ public class AdsController {
         return commentService.getAllComments(adsPk);
     }
 
-    @Operation(summary = "получаем комментарий (по его ID) у данного обяъвления (по его первичному ключу)",
+    @Operation(summary = "получаем комментарий (по его ID) у данного объявления (по его первичному ключу)",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK"),
                     @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -206,7 +206,7 @@ public class AdsController {
     //    @PreAuthorize("@adsServiceImpl.getAds(#adsPk).body.email.equals(authentication.principal.username) or hasAuthority('ADMIN')") - к этому варианту можно вернуться,
     //    когда разберемся с картинку у объявления
     @PreAuthorize("@userServiceImpl.getUser(@commentServiceImpl.getAdsComment(#adsPk,#id).body.author).body.email.equals(authentication.principal.username) or hasAuthority('ADMIN')")
-    @Operation(summary = "удаляем комментарий (по его ID) у данного обяъвления (по его первичному ключу)",
+    @Operation(summary = "удаляем комментарий (по его ID) у данного объявления (по его первичному ключу)",
             responses = {
                     @ApiResponse(responseCode = "204", description = "No Content"),
                     @ApiResponse(responseCode = "401", description = "Unauthorized"),
@@ -215,9 +215,10 @@ public class AdsController {
     @DeleteMapping("/{adsPk}/comments/{id}")
     public ResponseEntity<Void> deleteAdsComment(
             @Parameter(description = "передаем первичный ключ обявления")
-            @PathVariable Integer adsPk,
+            @PathVariable(value = "adsPk") Integer adsPk,
             @Parameter(description = "передаем ID комментария")
-            @PathVariable Integer id) {
+            @PathVariable(value = "id") Integer id) {
+        log.info("remove comment method");
         return commentService.deleteAdsComment(adsPk, id);
     }
 
@@ -236,6 +237,7 @@ public class AdsController {
             @PathVariable Integer id,
             @RequestBody AdsCommentDto adsCommentDto
     ) {
+        log.info("update comment method");
         return commentService.updateAdsComment(adsPk, id, adsCommentDto);
     }
 }
