@@ -31,21 +31,18 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     public ResponseEntity<Void> updateImage(Long adsId, MultipartFile file) {
-//        log.info("file "+ file.getSize()+" "+file.getContentType());
         Optional<Ads> optionalAds = adsRepository.findById(adsId);
         if (optionalAds.isPresent()) {
             Ads ads = optionalAds.get();
-            String imagesFilePath = ads.getImage();
-            Optional<Image> optionalImage = imageRepository.findImageByFilePath(imagesFilePath);
+            String imagesFilePath = ads.getImage();//получили путь из Объявления
+            Optional<Image> optionalImage = imageRepository.findImageByFilePath(imagesFilePath);//ищем по пути саму картинку
             if (optionalImage.isPresent()) {
                 Image image = optionalImage.get();
-                log.info("до " + image);
                 try {
                     Image imageUpdated = adsMapper.fileToImage(file, image);
-                    Image save = imageRepository.save(imageUpdated);
-                    log.info("после " + save);
+                    imageRepository.save(imageUpdated);
 
-                    log.info("картинка " + image.getId() + " в объявлении " + ads.getId() + "обновлена");
+                    log.info("картинка " + image.getId() + " в объявлении " + ads.getId() + " обновлена");
                     return ResponseEntity.ok().build();
                 } catch (IOException e) {
                     e.printStackTrace();

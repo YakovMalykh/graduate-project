@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Slf4j
@@ -53,16 +53,8 @@ public class AdsController {
             @RequestPart("properties") CreateAdsDto createAdsDto, @RequestPart("image") List<MultipartFile> imageList
     ) {
         log.info("метод добавления нового объявления");
-        try {
-            return adsService.addAdsToDb(createAdsDto, imageList);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return adsService.addAdsToDb(createAdsDto, imageList);
     }
-
-
-
-
 
     @Operation(summary = "получаем список всех объявлений",
             responses = {
@@ -75,7 +67,6 @@ public class AdsController {
     @GetMapping
     public ResponseEntity<ResponseWrapperAdsDto> getAllAds() {
         log.info("метод получения всех объявлений");
-
         return adsService.getAllAds();
     }
 
@@ -127,11 +118,10 @@ public class AdsController {
     // => затем возвращается ответ в контроллер и здесь у нас не проходит проверка прописанная в @PostAuthorize, то в этом случае все изменения внесенные в БД откатятся?
     public ResponseEntity<AdsDto> updateAds(
             @Parameter(description = "передаем ID объявления") @PathVariable Integer id,
-            @RequestBody AdsDto adsDto
-//            Authentication authentication
+            @RequestBody CreateAdsDto createAdsDto
     ) {
         log.info("метод обновления объявления");
-        return adsService.updateAds(id, adsDto);
+        return adsService.updateAds(id, createAdsDto);
     }
 
     @PreAuthorize("@adsServiceImpl.getAds(#id).body.email.equals(authentication.principal.username) or hasAuthority('ADMIN')")
@@ -139,7 +129,7 @@ public class AdsController {
     @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<Void> updateImage(
             @PathVariable Integer id,
-            @RequestBody MultipartFile file
+            @RequestPart(value = "image") MultipartFile file
     ) {
         return imageService.updateImage(id.longValue(), file);
     }
@@ -169,15 +159,18 @@ public class AdsController {
                     @ApiResponse(responseCode = "403", description = "Forbidden"),
                     @ApiResponse(responseCode = "404", description = "Not Found")
             })
-    @PostMapping("/{adsPk}/comment")
+    @PostMapping(value = "/{adsPk}/comments")
     public ResponseEntity<AdsCommentDto> addAdsComment(
-            @Parameter(description = "передаем заполненный комментарий")
+            @Parameter(description = "передаем текст комментария")
+            @NotNull
             @RequestBody AdsCommentDto adsCommentDto,
-            @Parameter(description = "передаем первичный ключ обявления")
-            @PathVariable Integer adsPk
+            @Parameter(description = "передаем первичный ключ объявления")
+            @PathVariable Integer adsPk,
+            Authentication authentication
     ) {
-
-        return commentService.addCommentToDb(adsPk, adsCommentDto);
+        log.info("create comment method");
+        String authorUsername = authentication.getName();
+        return commentService.addCommentToDb(adsPk, adsCommentDto, authorUsername);
     }
 
     @Operation(summary = "получаем список всех комментариев у данного обяъвления",
@@ -187,9 +180,9 @@ public class AdsController {
                     @ApiResponse(responseCode = "403", description = "Forbidden"),
                     @ApiResponse(responseCode = "404", description = "Not Found")
             })
-    @GetMapping("/{adsPk}/comment")
+    @GetMapping("/{adsPk}/comments")
     public ResponseEntity<ResponseWrapperAdsCommentDto> getAdsComments(
-            @Parameter(description = "передаем первичный ключ обявления")
+            @Parameter(description = "передаем первичный ключ объявления")
             @PathVariable Integer adsPk) {
         return commentService.getAllComments(adsPk);
     }
@@ -201,7 +194,7 @@ public class AdsController {
                     @ApiResponse(responseCode = "403", description = "Forbidden"),
                     @ApiResponse(responseCode = "404", description = "Not Found")
             })
-    @GetMapping("/{adsPk}/comment/{id}")
+    @GetMapping("/{adsPk}/comments/{id}")
     public ResponseEntity<AdsCommentDto> getAdsComment(
             @Parameter(description = "передаем первичный ключ обявления")
             @PathVariable Integer adsPk,
@@ -219,7 +212,7 @@ public class AdsController {
                     @ApiResponse(responseCode = "401", description = "Unauthorized"),
                     @ApiResponse(responseCode = "403", description = "Forbidden")
             })
-    @DeleteMapping("/{adsPk}/comment/{id}")
+    @DeleteMapping("/{adsPk}/comments/{id}")
     public ResponseEntity<Void> deleteAdsComment(
             @Parameter(description = "передаем первичный ключ обявления")
             @PathVariable Integer adsPk,
@@ -237,7 +230,7 @@ public class AdsController {
                     @ApiResponse(responseCode = "401", description = "Unauthorized"),
                     @ApiResponse(responseCode = "403", description = "Forbidden")
             })
-    @PatchMapping("/{adsPk}/comment/{id}")
+    @PatchMapping("/{adsPk}/comments/{id}")
     public ResponseEntity<AdsCommentDto> updateAdsComment(
             @PathVariable Integer adsPk,
             @PathVariable Integer id,
