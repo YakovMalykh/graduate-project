@@ -41,7 +41,7 @@ public abstract class CommentMapper {
 
     public abstract List<AdsCommentDto> listCommentsToListAdsCommentDto(List<Comment> commentsList);
 
-    @Mapping(target = "id", source = "pk")// не знаю нужно ли это в данном случае
+    @Mapping(target = "adsId", source = "pk")
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     public abstract void updateCommentFromAdsCommentDto(AdsCommentDto adsCommentDto, @MappingTarget Comment comment);
 
