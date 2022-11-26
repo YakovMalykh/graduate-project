@@ -10,7 +10,7 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
-
+    @Mapping(target = "image", constant ="/users/me/image") //+ "java(user.getId)")
     UserDto userToUserDto(User user);
 
      User userDtoToUser (UserDto userDto);
