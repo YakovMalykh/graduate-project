@@ -73,7 +73,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<UserDto> getUsersMe(Authentication auth) {
         log.info("Сервис получения текущего юзера");
-        Optional<User> optionalUser = userRepository.getUserByEmailIgnoreCase(auth.getName());
+        Optional<User> optionalUser = Optional.of(userRepository.getUserByEmailIgnoreCase(auth.getName()).orElseThrow());
         if (optionalUser.isEmpty()) {
             log.info("Текущего пользователя не в БД");
             return ResponseEntity.notFound().build();
@@ -88,6 +88,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<byte[]> getUsersMeImage(Authentication auth) {
         log.info("Сервис получения аватара текущего юзера");
+        log.info(auth.getName());
         Optional<User> optionalUser = userRepository.getUserByEmailIgnoreCase(auth.getName());
         Avatar avatar = avatarRepository.findAvatarByUser(optionalUser.get()).orElse(new Avatar()); //bили добавить картинку по умолчанию
         HttpHeaders headers = new HttpHeaders();
@@ -106,7 +107,7 @@ public class UserServiceImpl implements UserService {
         }
         Avatar avatar = avatarRepository.findAvatarByUser(optionalUser.get()).orElse(new Avatar());
         avatar.setUser(optionalUser.get());
-        avatar.setFileSize(avatarFile.getSize());
+       // avatar.setFileSize(avatarFile.getSize());
         avatar.setMediaType(avatarFile.getContentType());
         avatar.setPrewiew(avatarFile.getBytes());
         avatarRepository.save(avatar);

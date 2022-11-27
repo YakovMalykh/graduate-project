@@ -33,7 +33,7 @@ public class UserController {
 //здесь прописываем авторити вместо ролей, т.к. у насх прописываются авторити у юзера
     // все что без приставки ROLE_ являетися авторити
     @Operation(
-            summary = "выводим всех пользователей",
+            summary = "выводим профиль пользователя",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK",
                             content = @Content(schema = @Schema(implementation = ResponseWrapperUserDto.class))),
@@ -45,8 +45,7 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<UserDto> getUsersMe(Authentication auth) {
         log.info("метод вывода текущего пользователя");
-       log.info(String.valueOf(userService.getUsersMe( auth)));
-        return userService.getUsersMe( auth);
+        return userService.getUsersMe(auth);
     }
 
     @Operation(
