@@ -5,11 +5,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
 
-import java.io.IOException;
 import java.util.List;
 
 public interface AdsService {
-    ResponseEntity<AdsDto> addAdsToDb(CreateAdsDto createAdsDto, List<MultipartFile> images) throws IOException;
+    ResponseEntity<AdsDto> addAdsToDb(CreateAdsDto createAdsDto, List<MultipartFile> images);
 
     ResponseEntity<ResponseWrapperAdsDto> getAllAds();
 
@@ -17,7 +16,7 @@ public interface AdsService {
 
     ResponseEntity<FullAdsDto> getAds(Integer adsPk);
 
-    ResponseEntity<AdsDto> updateAds(Integer adsPk, AdsDto adsDto);
+    ResponseEntity<AdsDto> updateAds(Integer adsPk, CreateAdsDto createAdsDto);
 
     ResponseEntity<ResponseWrapperAdsDto> getAdsMe(Authentication auth);
 

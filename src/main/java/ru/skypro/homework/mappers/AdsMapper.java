@@ -24,14 +24,14 @@ public abstract class AdsMapper {
     protected ImageRepository imageRepository;
 
     @Mapping(target = "pk", source = "id")
-    @Mapping(target = "image", source = "images")
+//    @Mapping(target = "image", source = "images")
     public abstract AdsDto adsToAdsDto(Ads ads);
 
     public Integer userToInteger(User author) {
         return Math.toIntExact(author.getId());
     }
 
-    public String imageToString(List<Image> images) {
+      public String imageToString(List<Image> images) {
         String imageStr = "";
         if (!images.isEmpty()) {
             imageStr += images.get(0).getFilePath();
@@ -40,7 +40,7 @@ public abstract class AdsMapper {
     }
 
     @Mapping(target = "id", source = "pk")
-    @Mapping(target = "images", source = "image")
+//    @Mapping(target = "images", source = "image")
     public abstract Ads adsDtoToAds(AdsDto adsDto);
 
     public List<Image> stringToImage(String imageStr) { //не понятно, как тут все таки надо возвращать
@@ -59,7 +59,7 @@ public abstract class AdsMapper {
     public abstract Ads createAdsDtoToAds(CreateAdsDto createAdsDto);
 
     @Mapping(target = "pk", source = "ads.id")
-    @Mapping(target = "image", source = "ads.images")
+  //  @Mapping(target = "image", source = "ads.images")
     @Mapping(target = "authorFirstName", source = "user.firstName")
     @Mapping(target = "authorLastName", source = "user.lastName")
     public abstract FullAdsDto adsToFullAdsDto(Ads ads, User user, List<Image> images);
@@ -74,13 +74,16 @@ public abstract class AdsMapper {
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     public abstract void updateAdsFromAdsDto(AdsDto adsDto, @MappingTarget Ads ads);
 
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    public abstract void updateAdsFromCreateAdsDto(CreateAdsDto createAdsDto, @MappingTarget Ads ads);
+
 
     public abstract List<AdsDto> listAdsToListAdsDto(List<Ads> adsList);
 
-    @Mapping(target = "filePath", expression = "java(file.getResource().getFilename())")
-    @Mapping(target = "fileSize", expression = "java((int) (file.getSize()))")
+    @Mapping(target = "fileSize", expression = "java(file.getSize())")
     @Mapping(target = "mediaType", expression = "java(file.getContentType())")
-    @Mapping(target = "id", ignore = true)
     @Mapping(target = "prewiew", expression = "java(file.getBytes())")
-    public abstract Image imageToFile(MultipartFile file) throws IOException;
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    public abstract Image fileToImage(MultipartFile file, @MappingTarget Image image) throws IOException;
+
 }

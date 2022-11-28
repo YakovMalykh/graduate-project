@@ -10,10 +10,10 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface UserMapper {
-
+    @Mapping(target = "image", constant ="/users/me/image") //+ "java(user.getId)")
     UserDto userToUserDto(User user);
 
-    User userDtoToUser (UserDto userDto);
+     User userDtoToUser (UserDto userDto);
 
     @Mapping(target = "email", source = "username")
     User registerReqDtoToUser(RegisterReqDto registerReqDto);
