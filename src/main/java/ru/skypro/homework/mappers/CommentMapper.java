@@ -33,9 +33,11 @@ public abstract class CommentMapper {
         // не знаю стоит ли проверять на Null возвращаемое значение, т.к. по логике не могу
         // представить ситуации, когда у объявления нет автора и его нет в БД
         return userRepository.findById(authorId.longValue()).get();
+        // fix me
     }
 
     public Ads inregerToAds(Integer adsPk) {
+        // fix me
         return adsRepository.findById(adsPk.longValue()).get();
     }
 
