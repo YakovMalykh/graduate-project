@@ -1,7 +1,6 @@
 package ru.skypro.homework.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -18,12 +17,8 @@ import ru.skypro.homework.repositories.CommentRepository;
 import ru.skypro.homework.repositories.ImageRepository;
 import ru.skypro.homework.repositories.UserRepository;
 import ru.skypro.homework.service.AdsService;
-import ru.skypro.homework.service.FileService;
 
-import javax.imageio.ImageIO;
 import javax.transaction.Transactional;
-import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,29 +26,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static java.nio.file.StandardOpenOption.CREATE_NEW;
-
 
 @Slf4j
 @Service
 @Transactional
 public class AdsServiceImpl implements AdsService {
-    @Value("$(image.dir.path)")
-    private String imageDir;
     private final AdsRepository adsRepository;
     private final UserRepository userRepository;
     private final ImageRepository imageRepository;
     private final CommentRepository commentRepository;
     private final AdsMapper adsMapper;
-    private final FileService fileService;
 
-    public AdsServiceImpl(AdsRepository adsRepository, UserRepository userRepository, ImageRepository imageRepository, CommentServiceImpl commentService, CommentRepository commentRepository, AdsMapper adsMapper, FileService fileService) {
+    public AdsServiceImpl(AdsRepository adsRepository, UserRepository userRepository, ImageRepository imageRepository, CommentServiceImpl commentService, CommentRepository commentRepository, AdsMapper adsMapper) {
         this.adsRepository = adsRepository;
         this.userRepository = userRepository;
         this.imageRepository = imageRepository;
         this.commentRepository = commentRepository;
         this.adsMapper = adsMapper;
-        this.fileService = fileService;
     }
 
     @Override
@@ -86,27 +75,7 @@ public class AdsServiceImpl implements AdsService {
         return ResponseEntity.notFound().build();
     }
 
-    /**
-     * нужен ли нам этот метод? зачем нам файл сохранять в папку?
-     */
-    private Path saveFileIntoFolder(String imageDir, Ads ad, MultipartFile file) throws IOException {
-        // вместо ad.getId() м. прописать tittle, на момент вызоыва метода Id еще null
-        Path filePath = Path.of(imageDir, ad.getTitle() + "_" + fileService.getFileName(file.getOriginalFilename()) + "." + fileService.getExtensions(file.getOriginalFilename()));
-        Files.createDirectories(filePath.getParent());
-        Files.deleteIfExists(filePath);
-
-        try (
-                InputStream is = file.getInputStream();
-                OutputStream os = Files.newOutputStream(filePath, CREATE_NEW);
-                BufferedInputStream bis = new BufferedInputStream(is, 1024);
-                BufferedOutputStream bos = new BufferedOutputStream(os, 1024)
-        ) {
-            bis.transferTo(bos);
-        }
-        return filePath;
-    }
-
-    /**
+      /**
      * этот метод следовало бы размещать в ImageService
      */
     private Image saveImageIntoDb(Ads ad, MultipartFile file) {
@@ -137,7 +106,7 @@ public class AdsServiceImpl implements AdsService {
         List<AdsDto> adsDtoList = adsMapper.listAdsToListAdsDto(adsList);
         responseWrapperAdsDto.setCount(adsDtoList.size());
         responseWrapperAdsDto.setResults(adsDtoList);
-        log.info("получили все объявления " + responseWrapperAdsDto.toString());
+        log.info("получили все объявления " + responseWrapperAdsDto);
         return ResponseEntity.ok(responseWrapperAdsDto);
     }
 
@@ -151,7 +120,7 @@ public class AdsServiceImpl implements AdsService {
             List<AdsDto> adsDtoList = adsMapper.listAdsToListAdsDto(adsList);
             responseWrapperAdsDto.setCount(adsDtoList.size());
             responseWrapperAdsDto.setResults(adsDtoList);
-            log.info("получили объявления обратившегося пользователя" + responseWrapperAdsDto.toString());//удалить позже...
+            log.info("получили объявления обратившегося пользователя" + responseWrapperAdsDto);//удалить позже...
             return ResponseEntity.status(HttpStatus.OK).body(responseWrapperAdsDto);
 
         } else {
