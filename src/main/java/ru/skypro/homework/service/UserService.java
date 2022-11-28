@@ -2,12 +2,11 @@ package ru.skypro.homework.service;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import ru.skypro.homework.dto.NewPasswordDto;
-import ru.skypro.homework.dto.RegisterReqDto;
-import ru.skypro.homework.dto.ResponseWrapperUserDto;
-import ru.skypro.homework.dto.UserDto;
+import org.springframework.web.multipart.MultipartFile;
+import ru.skypro.homework.dto.*;
 import ru.skypro.homework.models.User;
 
+import java.io.IOException;
 import java.util.Optional;
 
 public interface UserService {
@@ -16,7 +15,7 @@ public interface UserService {
 
     ResponseEntity<ResponseWrapperUserDto> getUsers();
 
-    ResponseEntity<UserDto> updateUser(UserDto userDto);
+    ResponseEntity<UserDto> updateUser(UserDto createUserDto, Authentication auth);
 
     /**
      * метод не дописан
@@ -26,4 +25,10 @@ public interface UserService {
     ResponseEntity<UserDto> getUser(Integer id);
 
     Optional<User> userExists(String username);
+
+    ResponseEntity<UserDto> getUsersMe(Authentication auth);
+
+    ResponseEntity<byte[]> getUsersMeImage(Authentication auth);
+
+    ResponseEntity<byte[]> updateUserImage(MultipartFile avatarFile, Authentication auth) throws IOException;
 }

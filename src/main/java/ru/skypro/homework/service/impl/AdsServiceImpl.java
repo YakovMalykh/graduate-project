@@ -18,6 +18,7 @@ import ru.skypro.homework.repositories.CommentRepository;
 import ru.skypro.homework.repositories.ImageRepository;
 import ru.skypro.homework.repositories.UserRepository;
 import ru.skypro.homework.service.AdsService;
+import ru.skypro.homework.service.FileService;
 
 import javax.imageio.ImageIO;
 import javax.transaction.Transactional;
@@ -44,17 +45,19 @@ public class AdsServiceImpl implements AdsService {
     private final ImageRepository imageRepository;
     private final CommentRepository commentRepository;
     private final AdsMapper adsMapper;
+    private final FileService fileService;
 
-    public AdsServiceImpl(AdsRepository adsRepository, UserRepository userRepository, ImageRepository imageRepository, CommentServiceImpl commentService, CommentRepository commentRepository, AdsMapper adsMapper) {
+    public AdsServiceImpl(AdsRepository adsRepository, UserRepository userRepository, ImageRepository imageRepository, CommentServiceImpl commentService, CommentRepository commentRepository, AdsMapper adsMapper, FileService fileService) {
         this.adsRepository = adsRepository;
         this.userRepository = userRepository;
         this.imageRepository = imageRepository;
         this.commentRepository = commentRepository;
         this.adsMapper = adsMapper;
+        this.fileService = fileService;
     }
 
     @Override
-    public ResponseEntity<AdsDto> addAdsToDb(CreateAdsDto createAdsDto, List<MultipartFile> filesList) throws IOException {
+    public ResponseEntity<AdsDto> addAdsToDb(CreateAdsDto createAdsDto, List<MultipartFile> filesList) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         log.info("метод addAdsToD");
@@ -64,16 +67,17 @@ public class AdsServiceImpl implements AdsService {
 
             List<Image> images = new ArrayList<>();
             for (MultipartFile file : filesList) {
-                Path filePath = saveFileIntoFolder(imageDir, ad, file);
-                Image image = saveImageIntoDb(filePath, ad, file);
+                Image image = saveImageIntoDb(ad, file);
                 images.add(image);
             }
 
             ad.setAuthor(user);
             ad.setImages(images);
+            ad.setImage(String.format("/images/%s", images.get(0).getId().toString()));
 
             Ads savedAd = adsRepository.save(ad);
             AdsDto adsDto = adsMapper.adsToAdsDto(savedAd);
+            log.info(adsDto.toString());
 
             log.info("new ad is saved to DB! Id: " + savedAd.getId() + ", author: " + savedAd.getAuthor());
             return ResponseEntity.ok(adsDto);
@@ -82,9 +86,12 @@ public class AdsServiceImpl implements AdsService {
         return ResponseEntity.notFound().build();
     }
 
+    /**
+     * нужен ли нам этот метод? зачем нам файл сохранять в папку?
+     */
     private Path saveFileIntoFolder(String imageDir, Ads ad, MultipartFile file) throws IOException {
         // вместо ad.getId() м. прописать tittle, на момент вызоыва метода Id еще null
-        Path filePath = Path.of(imageDir, ad.getTitle() + "_" + file.getOriginalFilename() + "." + getExtensions(file.getOriginalFilename()));
+        Path filePath = Path.of(imageDir, ad.getTitle() + "_" + fileService.getFileName(file.getOriginalFilename()) + "." + fileService.getExtensions(file.getOriginalFilename()));
         Files.createDirectories(filePath.getParent());
         Files.deleteIfExists(filePath);
 
@@ -102,54 +109,35 @@ public class AdsServiceImpl implements AdsService {
     /**
      * этот метод следовало бы размещать в ImageService
      */
-    private Image saveImageIntoDb(Path filePath, Ads savedAd, MultipartFile file) throws IOException {
+    private Image saveImageIntoDb(Ads ad, MultipartFile file) {
         Image image = new Image();
-        image.setAds(savedAd);
-        image.setFilePath(filePath.toString());
+        image.setAds(ad);
         image.setFileSize(file.getSize());
         image.setMediaType(file.getContentType());
-        image.setPrewiew(file.getBytes()); // это получается лишнее
-//        image.setPrewiew(generatePreview(filePath));
-        return imageRepository.save(image);
-    }
 
-    /**
-     * нужен ли он нам???
-     */
-    private byte[] generatePreview(Path filePath) throws IOException {
-        log.info("method generatePreview started");
-        try (InputStream is = Files.newInputStream(filePath);
-             BufferedInputStream bis = new BufferedInputStream(is, 1024);
-             ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-            BufferedImage image = ImageIO.read(bis);
-
-            int height = image.getHeight() / (image.getWidth() / 100);
-            BufferedImage prewiew = new BufferedImage(100, height, image.getType());
-            Graphics2D graphics = prewiew.createGraphics();
-            graphics.drawImage(image, 0, 0, 100, height, null);
-            graphics.dispose();
-            ImageIO.write(prewiew, getExtensions(filePath.getFileName().toString()), baos);
-            return baos.toByteArray();
+        try {
+            image.setPrewiew(file.getBytes());
+        } catch (IOException e) {
+            log.info("файла похоже нет");
+            e.printStackTrace();
         }
-    }
 
-    private String getExtensions(String fileName) {
-        log.info("method getExtensions started");
-        return fileName.substring(fileName.lastIndexOf(".") + 1);
+        Image saved = imageRepository.save(image);
+        Long id = saved.getId();//получаю Id, чтобы прописать корректный путь к ней
+
+        image.setFilePath(String.format("/images/%s", id));//прописываю корректный путь
+
+        return imageRepository.save(image);//снова сохраняю
     }
 
     @Override
     public ResponseEntity<ResponseWrapperAdsDto> getAllAds() {
         List<Ads> adsList = adsRepository.findAll();
         ResponseWrapperAdsDto responseWrapperAdsDto = new ResponseWrapperAdsDto();
-        if (!adsList.isEmpty()) {
-            List<AdsDto> adsDtoList = adsMapper.listAdsToListAdsDto(adsList);
-            responseWrapperAdsDto.setCount(adsDtoList.size());
-            responseWrapperAdsDto.setResults(adsDtoList);
-            log.info("получили все объявления");
-        } else {
-            log.info("объявлений не найдено");
-        }
+        List<AdsDto> adsDtoList = adsMapper.listAdsToListAdsDto(adsList);
+        responseWrapperAdsDto.setCount(adsDtoList.size());
+        responseWrapperAdsDto.setResults(adsDtoList);
+        log.info("получили все объявления " + responseWrapperAdsDto.toString());
         return ResponseEntity.ok(responseWrapperAdsDto);
     }
 
@@ -157,16 +145,25 @@ public class AdsServiceImpl implements AdsService {
     public ResponseEntity<ResponseWrapperAdsDto> getAdsMe(Authentication auth) {
         String username = auth.getName();
         User user = userRepository.getUserByEmailIgnoreCase(username).orElseThrow();
-        List<Ads> adsList = adsRepository.findAllByAuthor_Id(user.getId()); //потом заменим на автора из контекста
+        List<Ads> adsList = adsRepository.findAllByAuthor(user);
+        ResponseWrapperAdsDto responseWrapperAdsDto = new ResponseWrapperAdsDto();
         if (!adsList.isEmpty()) {
             List<AdsDto> adsDtoList = adsMapper.listAdsToListAdsDto(adsList);
-            ResponseWrapperAdsDto responseWrapperAdsDto = new ResponseWrapperAdsDto();
             responseWrapperAdsDto.setCount(adsDtoList.size());
             responseWrapperAdsDto.setResults(adsDtoList);
+            log.info("получили объявления обратившегося пользователя" + responseWrapperAdsDto.toString());//удалить позже...
             return ResponseEntity.status(HttpStatus.OK).body(responseWrapperAdsDto);
 
+        } else {
+            log.info("У пользователя " + username + " еще нет объявлений");
+            // заполняю responseWrapper пустым AdsDto иначе фронт не отображает страницу юзера, у которого нет объявлений
+            // в консоли фронта ошибка Uncaught TypeError: Cannot read properties of undefined (reading 'length') или
+            // ругается на обращение к null, хотя в Swagger требование что мы должны вернуть 404 ошибку
+            ArrayList<AdsDto> defaultListEmptyAdsDto = new ArrayList<>();
+            responseWrapperAdsDto.setCount(0);
+            responseWrapperAdsDto.setResults(defaultListEmptyAdsDto);
+            return ResponseEntity.ok(responseWrapperAdsDto);
         }
-        return ResponseEntity.notFound().build();
     }
 
     @Override
@@ -219,13 +216,14 @@ public class AdsServiceImpl implements AdsService {
 
 
     @Override
-    public ResponseEntity<AdsDto> updateAds(Integer adsPk, AdsDto adsDto) {
+    public ResponseEntity<AdsDto> updateAds(Integer adsPk, CreateAdsDto createAdsDto) {
         Optional<Ads> optionalAds = adsRepository.findById(adsPk.longValue());
 
         if (optionalAds.isPresent()) {
             Ads ads = optionalAds.get();
-            adsMapper.updateAdsFromAdsDto(adsDto, ads);
-            adsRepository.save(ads);
+            adsMapper.updateAdsFromCreateAdsDto(createAdsDto, ads);// обновляем поля объявления
+            Ads savedAndUpdatedAd = adsRepository.save(ads);// сохраняем обновленное объявл-е
+            AdsDto adsDto = adsMapper.adsToAdsDto(savedAndUpdatedAd);// конвертируем объявление в AdsDto, чтобы вернуть фронту
             log.info("success, ads with id: " + adsPk + "has been updated");
             return ResponseEntity.ok(adsDto);
         } else {

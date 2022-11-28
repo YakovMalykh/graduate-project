@@ -6,7 +6,7 @@ import ru.skypro.homework.dto.ResponseWrapperAdsCommentDto;
 
 public interface CommentService {
 
-    ResponseEntity<AdsCommentDto> addCommentToDb(Integer adsPk, AdsCommentDto adsCommentDto);
+    ResponseEntity<AdsCommentDto> addCommentToDb(Integer adsPk, AdsCommentDto commentDto, String authorUsername);
 
     /**
      * получаем все комментарии у заданного объявления

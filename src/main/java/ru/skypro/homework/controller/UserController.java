@@ -6,14 +6,18 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.ResponseWrapperUserDto;
 import ru.skypro.homework.dto.UserDto;
+import ru.skypro.homework.repositories.AvatarRepository;
+import ru.skypro.homework.repositories.UserRepository;
 import ru.skypro.homework.service.UserService;
+import java.io.IOException;
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
@@ -25,11 +29,11 @@ public class UserController {
 
     private final UserService userService;
 
- @PreAuthorize("hasAuthority('ADMIN')")
+ //   @PreAuthorize("hasAuthority('ADMIN')")
 //здесь прописываем авторити вместо ролей, т.к. у насх прописываются авторити у юзера
     // все что без приставки ROLE_ являетися авторити
     @Operation(
-            summary = "выводим всех пользователей",
+            summary = "выводим профиль пользователя",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK",
                             content = @Content(schema = @Schema(implementation = ResponseWrapperUserDto.class))),
@@ -39,9 +43,9 @@ public class UserController {
             }
     )
     @GetMapping("/me")
-    public ResponseEntity<ResponseWrapperUserDto> getUsers() {
-        log.info("метод вывода списка всех пользователей");
-        return userService.getUsers();
+    public ResponseEntity<UserDto> getUsersMe(Authentication auth) {
+        log.info("метод вывода текущего пользователя");
+        return userService.getUsersMe(auth);
     }
 
     @Operation(
@@ -55,12 +59,26 @@ public class UserController {
             }
     )
     @PatchMapping("/me")
-    public ResponseEntity<UserDto> updateUser(@RequestBody UserDto userDto) {
+    public ResponseEntity<UserDto> updateUser(@RequestBody UserDto userDto, Authentication auth) {
         log.info("метод обновления существующего пользователя");
-        return userService.updateUser(userDto);
+        return userService.updateUser(userDto, auth);
     }
-
-     @Operation(
+    @PatchMapping(value ="/me/image",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<byte[]> updateUserImage(@RequestPart ("image") MultipartFile avatarFile, Authentication auth) {
+        log.info("метод обновления аватара");
+        log.info(auth.getName());
+        try {
+            return userService.updateUserImage(avatarFile, auth);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    @GetMapping(value ="/me/image", produces = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<byte[]> getUserImage( Authentication auth ) {
+        log.info("метод получения аватара");
+             return userService.getUsersMeImage(auth);
+    }
+    @Operation(
             summary = "устанавливаем пользователю новый пароль",
             responses = {
                     @ApiResponse(responseCode = "200", description = "OK",
