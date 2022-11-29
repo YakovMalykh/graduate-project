@@ -1,6 +1,8 @@
 package ru.skypro.homework.constant;
 
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.models.Ads;
 import ru.skypro.homework.models.Comment;
@@ -10,6 +12,7 @@ import ru.skypro.homework.models.User;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static ru.skypro.homework.dto.Role.USER;
@@ -28,6 +31,10 @@ public class ConstantForTests {
     public static final String EMAIL = "user@mail.com";
 
     public static final String PASSWORD = "password";
+    public static final String ENCODED_PASSWORD = "{bcrypt}$2a$10$XK/IbwdysgmNbJWq5lOSyuGtpm/XGrekpw3ymuraNSLKXX5EmO1HK";
+
+    public static final String NEW_PASSWORD = "password4";
+    public static final String ENCODED_NEW_PASSWORD = "{bcrypt}$2a$10$c8smKdJ6hvo2o9oh1B3ZKOtEmKZtlfk8CJbUDzTeKMbGklHtl3wim";
     public static final Role ROLE = USER;
 
     public static final Ads TEST_ADS_1 = new Ads();
@@ -69,5 +76,43 @@ public class ConstantForTests {
     public static final NewPasswordDto NEW_PASSWORD_DTO = new NewPasswordDto();
 
     public static final List<UserDto> LIST_USER_DTO = new ArrayList<>();
+
+    public static final Authentication AUTHENTICATION = new Authentication() {
+        @Override
+        public String getName() {
+            return EMAIL;
+        }
+        @Override
+        public Collection<? extends GrantedAuthority> getAuthorities() {
+            return null;
+        }
+
+        @Override
+        public Object getCredentials() {
+            return null;
+        }
+
+        @Override
+        public Object getDetails() {
+            return null;
+        }
+
+        @Override
+        public Object getPrincipal() {
+            return null;
+        }
+
+        @Override
+        public boolean isAuthenticated() {
+            return false;
+        }
+
+        @Override
+        public void setAuthenticated(boolean isAuthenticated) throws IllegalArgumentException {
+
+        }
+
+
+    };
 
 }

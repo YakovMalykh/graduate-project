@@ -24,7 +24,6 @@ public abstract class AdsMapper {
     protected ImageRepository imageRepository;
 
     @Mapping(target = "pk", source = "id")
-//    @Mapping(target = "image", source = "images")
     public abstract AdsDto adsToAdsDto(Ads ads);
 
     public Integer userToInteger(User author) {
@@ -40,10 +39,9 @@ public abstract class AdsMapper {
     }
 
     @Mapping(target = "id", source = "pk")
-//    @Mapping(target = "images", source = "image")
     public abstract Ads adsDtoToAds(AdsDto adsDto);
 
-    public List<Image> stringToImage(String imageStr) { //не понятно, как тут все таки надо возвращать
+    public List<Image> stringToImage(String imageStr) {
         Image image = imageRepository.findImageByFilePath(imageStr).orElse(new Image());
         List<Image> images = new ArrayList<>();
         images.add(image);
@@ -51,26 +49,19 @@ public abstract class AdsMapper {
     }
 
     public User integerToUser(Integer authorId) {
-        return userRepository.findById(authorId.longValue()).get();
+        return userRepository.findById(authorId.longValue()).orElseThrow();
     }
 
 
-    // @Mapping(target = "id", source = "pk")
     public abstract Ads createAdsDtoToAds(CreateAdsDto createAdsDto);
 
     @Mapping(target = "pk", source = "ads.id")
-  //  @Mapping(target = "image", source = "ads.images")
     @Mapping(target = "authorFirstName", source = "user.firstName")
     @Mapping(target = "authorLastName", source = "user.lastName")
     public abstract FullAdsDto adsToFullAdsDto(Ads ads, User user, List<Image> images);
 
-    //@Mapping(target = "author", source = "user")
-//    @Mapping(target = "author", source = "user.id")
-//    @Mapping(target = "id", ignore = true)
-//    // @Mapping(target = "authorLastName", source = "user.lastName")
-//    public abstract Ads createAdsDtoUserToAds(CreateAdsDto createAdsDto, User user);
 
-    @Mapping(target = "id", source = "pk")// не знаю нужно ли это в данном случае
+    @Mapping(target = "id", source = "pk")
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     public abstract void updateAdsFromAdsDto(AdsDto adsDto, @MappingTarget Ads ads);
 

@@ -50,4 +50,4 @@ ALTER TABLE Avatars DROP COLUMN IF EXISTS file_size;
 -- changeset sascvotch:4
 
 INSERT INTO users (user_first_name, user_last_name,user_phone_number,user_email,user_password,user_role)
-VALUES ('Admin','Admin','+7(999)999-99-99','admin@admin.ru','adminpassword','ADMIN');
+VALUES ('Admin','Admin','+7(999)999-99-99','admin@admin.ru','{bcrypt}$2a$10$XK/IbwdysgmNbJWq5lOSyuGtpm/XGrekpw3ymuraNSLKXX5EmO1HK','ADMIN');

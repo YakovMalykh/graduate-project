@@ -14,7 +14,6 @@ import ru.skypro.homework.service.UserService;
 public class AuthServiceImpl implements AuthService {
     private final UserDetailsService userDetailsService;
     private final UserService userService;
-//    private final UserDetailsManager manager;
 
     private final PasswordEncoder encoder;
 
@@ -24,14 +23,9 @@ public class AuthServiceImpl implements AuthService {
         this.encoder = encoder;
     }
 
-//    public AuthServiceImpl(UserDetailsManager manager) {
-//        this.manager = manager;
-//        this.encoder = new BCryptPasswordEncoder();
-//    }
-
     @Override
     public boolean login(String userName, String password) {
-        if (!userService.userExists(userName).isPresent()) {
+        if (userService.userExists(userName).isEmpty()) {
             log.info("не нашел пользователя");
             return false;
         }
