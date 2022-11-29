@@ -26,6 +26,9 @@ public interface UserService {
 
     Optional<User> userExists(String username);
 
+    /**
+     * метод получения данных обратившегося пользователя
+     */
     ResponseEntity<UserDto> getUsersMe(Authentication auth);
 
     ResponseEntity<byte[]> getUsersMeImage(Authentication auth);

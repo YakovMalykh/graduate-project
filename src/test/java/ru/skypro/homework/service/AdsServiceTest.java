@@ -7,24 +7,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.mappers.AdsMapper;
-import ru.skypro.homework.models.Ads;
-import ru.skypro.homework.models.Comment;
-import ru.skypro.homework.models.User;
 import ru.skypro.homework.repositories.AdsRepository;
 import ru.skypro.homework.service.impl.AdsServiceImpl;
 
-import javax.validation.constraints.Null;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.times;
 import static ru.skypro.homework.constant.ConstantForTests.*;
 
 
@@ -65,7 +55,7 @@ public class AdsServiceTest {
         ADS_DTO.setTitle(TITLE);
         ADS_DTO.setPrice(PRICE);
 
-        TEST_ADS_1.setId(1l);
+        TEST_ADS_1.setId(1L);
         TEST_ADS_1.setAuthor(AUTHOR_2);
         TEST_ADS_1.setImages(LIST_IMAGES);
         TEST_ADS_1.setTitle(TITLE);
@@ -92,7 +82,7 @@ public class AdsServiceTest {
         ResponseEntity<ResponseWrapperAdsDto> response = adsService.getAllAds();
 
         assertEquals(1, response.getBody().getCount());
-        assertEquals(LIST_ADS_DTO, response.getBody().getResult());
+        assertEquals(LIST_ADS_DTO, response.getBody().getResults());
     }
 
     /*   @Test

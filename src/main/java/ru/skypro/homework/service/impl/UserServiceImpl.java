@@ -12,7 +12,6 @@ import ru.skypro.homework.dto.*;
 import ru.skypro.homework.mappers.AdsMapper;
 import ru.skypro.homework.mappers.UserMapper;
 import ru.skypro.homework.models.Avatar;
-import ru.skypro.homework.models.Image;
 import ru.skypro.homework.models.User;
 import ru.skypro.homework.repositories.AvatarRepository;
 import ru.skypro.homework.repositories.UserRepository;
@@ -70,6 +69,9 @@ public class UserServiceImpl implements UserService {
 
     }
 
+    /**
+     * метод получения данных обратившегося пользователя
+     */
     @Override
     public ResponseEntity<UserDto> getUsersMe(Authentication auth) {
         log.info("Сервис получения текущего юзера");
