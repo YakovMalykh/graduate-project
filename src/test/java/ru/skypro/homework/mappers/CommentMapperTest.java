@@ -74,7 +74,7 @@ class CommentMapperTest {
         Comment comment = mapper.adsCommentDtoToComment(ADS_COMMENT_DTO);
 
         assertEquals(ADS, comment.getAdsId());
-        assertEquals(1, comment.getAuthor().getId());//сначала нужно прописать логику в маппере по обращению к UserRepository
+        assertEquals(1, comment.getAuthor().getId());
         assertEquals(PARSE_DATE, comment.getCreatedAt());
         assertEquals("text", comment.getText());
 
@@ -89,9 +89,7 @@ class CommentMapperTest {
 
     @Test
     void listCommentsToListAdsCommentDto() {
-
         List<AdsCommentDto> result = mapper.listCommentsToListAdsCommentDto(LIST_COMMENTS);
-
         assertEquals(AdsCommentDto.class, result.get(0).getClass());
     }
 
