@@ -1,7 +1,6 @@
-package ru.skypro.homework.components.validation;
+package ru.skypro.homework.components;
 
 import org.passay.*;
-import ru.skypro.homework.components.validation.ValidPassword;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
@@ -22,16 +21,16 @@ public class PasswordConstraintValidator implements ConstraintValidator <ValidPa
                 new LengthRule(8, 30),
 
                 // at least one upper-case character
-                new CharacterRule(EnglishCharacterData.UpperCase, 1),
+              //  new CharacterRule(EnglishCharacterData.UpperCase, 1),
 
                 // at least one lower-case character
-                new CharacterRule(EnglishCharacterData.LowerCase, 1),
+              //  new CharacterRule(EnglishCharacterData.LowerCase, 1),
 
                 // at least one digit character
                 new CharacterRule(EnglishCharacterData.Digit, 1),
 
                 // at least one symbol (special character)
-                new CharacterRule(EnglishCharacterData.Special, 1),
+              //  new CharacterRule(EnglishCharacterData.Special, 1),
 
                 // no whitespace
                 new WhitespaceRule()

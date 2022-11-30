@@ -1,7 +1,7 @@
 package ru.skypro.homework.dto;
 
 import lombok.Data;
-import ru.skypro.homework.components.validation.ValidPassword;
+import ru.skypro.homework.components.ValidPassword;
 
 @Data
 public class NewPasswordDto {

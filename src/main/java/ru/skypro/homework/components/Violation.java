@@ -1,4 +1,4 @@
-package ru.skypro.homework.components.validation;
+package ru.skypro.homework.components;
 
 
 import lombok.Getter;
