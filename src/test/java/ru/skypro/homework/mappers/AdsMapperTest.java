@@ -7,17 +7,13 @@ import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.web.multipart.MultipartFile;
-import ru.skypro.homework.dto.AdsCommentDto;
 import ru.skypro.homework.dto.AdsDto;
 import ru.skypro.homework.dto.FullAdsDto;
 import ru.skypro.homework.models.Ads;
 import ru.skypro.homework.models.Image;
-import ru.skypro.homework.repositories.AdsRepository;
 import ru.skypro.homework.repositories.ImageRepository;
 import ru.skypro.homework.repositories.UserRepository;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,8 +30,6 @@ public class AdsMapperTest {
     UserRepository userRepository;
     @Mock
     ImageRepository imageRepository;
-    @Mock
-    AdsRepository adsRepository;
     @InjectMocks
     AdsMapper mapper = Mappers.getMapper(AdsMapper.class);
 
@@ -49,12 +43,9 @@ public class AdsMapperTest {
         AUTHOR_2.setLastName(LAST_NAME);
         AUTHOR_2.setFirstName(FIRST_NAME);
 
-
         IMAGE.setFilePath(IMAGE_STR);
         LIST_IMAGES.add(IMAGE);
 
-        // CREATE_ADS_DTO.setPk(1);
-        //CREATE_ADS_DTO.setImage(IMAGE_STR);
         CREATE_ADS_DTO.setTitle(TITLE);
         CREATE_ADS_DTO.setDescription(DESCRIPTION);
         CREATE_ADS_DTO.setPrice(PRICE);
@@ -65,16 +56,16 @@ public class AdsMapperTest {
         ADS_DTO.setTitle(TITLE);
         ADS_DTO.setPrice(PRICE);
 
-        TEST_ADS_1.setId(1l);
+        TEST_ADS_1.setId(1L);
         TEST_ADS_1.setAuthor(AUTHOR_2);
-        TEST_ADS_1.setImages(LIST_IMAGES);
+        TEST_ADS_1.setImage(IMAGE_STR);
         TEST_ADS_1.setTitle(TITLE);
         TEST_ADS_1.setDescription(DESCRIPTION_2);
         TEST_ADS_1.setPrice(PRICE);
 
         TEST_ADS_2.setId(2L);
         TEST_ADS_2.setAuthor(AUTHOR_2);
-        TEST_ADS_2.setImages(LIST_IMAGES);
+        TEST_ADS_2.setImage(IMAGE_STR);
         TEST_ADS_2.setTitle(TITLE_2);
         TEST_ADS_2.setDescription(DESCRIPTION_2);
         TEST_ADS_2.setPrice(PRICE_2);
@@ -102,7 +93,6 @@ public class AdsMapperTest {
 
     @Test
     void adsToAdsDto_whenMaps_thenCorrect() {
-        //   when(imageRepository.findImageByFilePath(anyString())).thenReturn(IMAGE);
 
         AdsDto adsDto = mapper.adsToAdsDto(TEST_ADS_2);
         assertEquals(2, adsDto.getPk());
@@ -114,20 +104,19 @@ public class AdsMapperTest {
 
     @Test
     void adsDtoToAds_whenMaps_thenCorrect() {
-        when(imageRepository.findImageByFilePath(anyString())).thenReturn(Optional.of(IMAGE));
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(AUTHOR_2));
 
         Ads ads = mapper.adsDtoToAds(ADS_DTO);
 
         assertEquals(1, ads.getId());
         assertEquals(AUTHOR_2, ads.getAuthor());
-        assertEquals(LIST_IMAGES, ads.getImages());
+        assertEquals(IMAGE_STR, ads.getImage());
         assertEquals(TITLE, ads.getTitle());
         assertEquals(PRICE, ads.getPrice());
     }
 
     @Test
-    void createdAdsDtoToAds_whenMaps_thenCorrect() {
+    void createAdsDtoToAds_whenMaps_thenCorrect() {
 
         Ads ads = mapper.createAdsDtoToAds(CREATE_ADS_DTO);
         assertEquals(TITLE, ads.getTitle());
@@ -151,21 +140,5 @@ public class AdsMapperTest {
         List<AdsDto> result = mapper.listAdsToListAdsDto(LIST_ADS);
         assertEquals(LIST_ADS_DTO, result);
      }
-  /*  @Test
-    void updateAdsFromAdsDto() {
-        ADS_DTO.setImage(null);
-        ADS_DTO.setPrice(null);
 
-   //     when(userRepository.findById(anyLong())).thenReturn(Optional.of(AUTHOR_2));
-   //     when(imageRepository.findImageByFilePath(anyString())).thenReturn((IMAGE));
-
-        mapper.updateAdsFromAdsDto(ADS_DTO, TEST_ADS_2);
-
-     //   assertEquals(AUTHOR_2, TEST_ADS_2.getAuthor());
-     //   assertEquals(1, TEST_ADS_2.getId());
-        assertEquals(ADS_DTO.getImage(), TEST_ADS_2.getImages());//не меняли поле
-        assertEquals(TITLE, TEST_ADS_2.getTitle());
-        assertEquals(PRICE_2, TEST_ADS_2.getPrice());//не меняли поле
-    }
-*/
 }

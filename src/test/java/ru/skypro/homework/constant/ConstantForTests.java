@@ -3,12 +3,16 @@ package ru.skypro.homework.constant;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.models.Ads;
 import ru.skypro.homework.models.Comment;
 import ru.skypro.homework.models.Image;
 import ru.skypro.homework.models.User;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -52,7 +56,7 @@ public class ConstantForTests {
     public static final String DESCRIPTION_2= "description 2";
 
     public static final String IMAGE_STR="image_str";
-    public static final String IMAGE_2_STR="image2_str";
+    public static final String IMAGE_2_STR="/images/%s";
 
     public static final Image IMAGE=new Image();
     public static final List<Image> LIST_IMAGES= new ArrayList<>();
@@ -63,6 +67,7 @@ public class ConstantForTests {
     public static final List<Comment> EMPTY_LIST_COMMENTS = new ArrayList<>();
     public static final AdsCommentDto ADS_COMMENT_DTO = new AdsCommentDto();
     public static final AdsDto ADS_DTO = new AdsDto();
+    public static final AdsDto ADS_DTO_2 = new AdsDto();
     public static final CreateAdsDto CREATE_ADS_DTO = new CreateAdsDto();
     public static final List<AdsCommentDto> LIST_ADS_COMMENT_DTO = new ArrayList<>();
 
@@ -114,5 +119,91 @@ public class ConstantForTests {
 
 
     };
+
+    public static final MultipartFile FILE_1 = new MultipartFile() {
+        @Override
+        public String getName() {
+            return null;
+        }
+
+        @Override
+        public String getOriginalFilename() {
+            return null;
+        }
+
+        @Override
+        public String getContentType() {
+            return "jpeg";
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return false;
+        }
+
+        @Override
+        public long getSize() {
+            return 10;
+        }
+
+        @Override
+        public byte[] getBytes() throws IOException {
+            return new byte[0];
+        }
+
+        @Override
+        public InputStream getInputStream() throws IOException {
+            return null;
+        }
+
+        @Override
+        public void transferTo(File dest) throws IOException, IllegalStateException {
+
+        }
+    };
+    public static final MultipartFile FILE_2 = new MultipartFile() {
+        @Override
+        public String getName() {
+            return null;
+        }
+
+        @Override
+        public String getOriginalFilename() {
+            return null;
+        }
+
+        @Override
+        public String getContentType() {
+            return "png";
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return false;
+        }
+
+        @Override
+        public long getSize() {
+            return 20;
+        }
+
+        @Override
+        public byte[] getBytes() throws IOException {
+            return new byte[0];
+        }
+
+        @Override
+        public InputStream getInputStream() throws IOException {
+            return null;
+        }
+
+        @Override
+        public void transferTo(File dest) throws IOException, IllegalStateException {
+
+        }
+    };
+
+    public static final  List<MultipartFile> LIST_OF_FILES = new ArrayList<>();
+
 
 }
