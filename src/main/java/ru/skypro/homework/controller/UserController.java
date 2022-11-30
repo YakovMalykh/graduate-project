@@ -9,12 +9,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.ResponseWrapperUserDto;
 import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.service.UserService;
+
+import javax.validation.Valid;
 import java.io.IOException;
 
 @Slf4j
@@ -22,7 +25,7 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
-
+@Validated
 public class UserController {
 
     private final UserService userService;
@@ -57,7 +60,7 @@ public class UserController {
             }
     )
     @PatchMapping("/me")
-    public ResponseEntity<UserDto> updateUser(@RequestBody UserDto userDto, Authentication auth) {
+    public ResponseEntity<UserDto> updateUser(@Valid @RequestBody UserDto userDto, Authentication auth) {
         log.info("метод обновления существующего пользователя");
         return userService.updateUser(userDto, auth);
     }
@@ -72,10 +75,10 @@ public class UserController {
             throw new RuntimeException(e);
         }
     }
-    @GetMapping(value = "/me/image", produces = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<byte[]> getUserImage(Authentication auth) {
+    @GetMapping(value = "/me/image/{id}", produces = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<byte[]> getUserImage(@PathVariable Long id) {
         log.info("метод получения аватара");
-        return userService.getUsersMeImage(auth);
+        return userService.getUsersIdImage(id);
     }
 
     @Operation(
@@ -89,7 +92,7 @@ public class UserController {
             }
     )
     @PostMapping("/set_password")
-    public ResponseEntity<NewPasswordDto> setPassword(@RequestBody NewPasswordDto passwordDto, Authentication auth) {
+    public ResponseEntity<NewPasswordDto> setPassword(@Valid @RequestBody NewPasswordDto passwordDto, Authentication auth) {
         log.info("метод установки пользователю нового пароля");
         // метод сервиса еще не дописан
         //если мы передаем аутентификацию в контроллер, то она автоматом берется из контекста?
