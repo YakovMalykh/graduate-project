@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import ru.skypro.homework.dto.AdsCommentDto;
 import ru.skypro.homework.dto.ResponseWrapperAdsCommentDto;
 import ru.skypro.homework.mappers.CommentMapper;
+import ru.skypro.homework.models.Ads;
 import ru.skypro.homework.models.Comment;
 import ru.skypro.homework.repositories.AdsRepository;
 import ru.skypro.homework.repositories.CommentRepository;
@@ -95,7 +96,8 @@ class CommentServiceTest {
     @Test
     void getAllComments_whenCommentsExists() {
         LIST_ADS_COMMENT_DTO.add(ADS_COMMENT_DTO);
-        when(commentRepository.findAllByAdsId(anyLong())).thenReturn(LIST_COMMENTS);
+        when(adsRepository.findById(anyLong())).thenReturn(Optional.of(ADS));
+        when(commentRepository.findAllByAdsId(any(Ads.class))).thenReturn(LIST_COMMENTS);
         when(commentMapper.listCommentsToListAdsCommentDto(LIST_COMMENTS)).thenReturn(LIST_ADS_COMMENT_DTO);
 
         ResponseEntity<ResponseWrapperAdsCommentDto> response = commentService.getAllComments(1);
@@ -106,7 +108,8 @@ class CommentServiceTest {
 
     @Test
     void getAllComments_whenCommentsListIsEmpty() {
-        when(commentRepository.findAllByAdsId(anyLong())).thenReturn(EMPTY_LIST_COMMENTS);
+        when(adsRepository.findById(anyLong())).thenReturn(Optional.of(ADS));
+        when(commentRepository.findAllByAdsId(any(Ads.class))).thenReturn(EMPTY_LIST_COMMENTS);
 
         ResponseEntity<ResponseWrapperAdsCommentDto> response = commentService.getAllComments(1);
 
@@ -138,6 +141,7 @@ class CommentServiceTest {
     void updateAdsComment_whenSuccess() {
         when(adsRepository.findById(anyLong())).thenReturn(Optional.of(ADS));
         when(commentRepository.findById(anyLong())).thenReturn(Optional.of(TEST_COMMENT_2));
+        when(commentMapper.commentToAdsCommentDto(any(Comment.class))).thenReturn(ADS_COMMENT_DTO);
 
         ResponseEntity<AdsCommentDto> response = commentService.updateAdsComment(1, 1, ADS_COMMENT_DTO);
 
