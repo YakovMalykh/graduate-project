@@ -100,7 +100,7 @@ public class CommentServiceImpl implements CommentService {
         }
     }
 
-    @Override// нужно понять что нам придет с фронта, если как и при создании комментария AdsCommentDto заполнен только text, то все ок
+    @Override
     public ResponseEntity<AdsCommentDto> updateAdsComment(Integer adsPk, Integer id, AdsCommentDto adsCommentDto) {
         Optional<Ads> optionalAds = adsRepository.findById(adsPk.longValue());
         Optional<Comment> optionalComment = commentRepository.findById(id.longValue());

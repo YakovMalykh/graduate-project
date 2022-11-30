@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
@@ -37,7 +36,7 @@ public class AdsServiceImpl implements AdsService {
     private final CommentRepository commentRepository;
     private final AdsMapper adsMapper;
 
-    public AdsServiceImpl(AdsRepository adsRepository, UserRepository userRepository, ImageRepository imageRepository, CommentServiceImpl commentService, CommentRepository commentRepository, AdsMapper adsMapper) {
+    public AdsServiceImpl(AdsRepository adsRepository, UserRepository userRepository, ImageRepository imageRepository, CommentRepository commentRepository, AdsMapper adsMapper) {
         this.adsRepository = adsRepository;
         this.userRepository = userRepository;
         this.imageRepository = imageRepository;
@@ -46,8 +45,7 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
-    public ResponseEntity<AdsDto> addAdsToDb(CreateAdsDto createAdsDto, List<MultipartFile> filesList) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    public ResponseEntity<AdsDto> addAdsToDb(CreateAdsDto createAdsDto, List<MultipartFile> filesList, Authentication auth) {
 
         log.info("метод addAdsToD");
         if (createAdsDto != null) {
@@ -125,9 +123,6 @@ public class AdsServiceImpl implements AdsService {
 
         } else {
             log.info("У пользователя " + username + " еще нет объявлений");
-            // заполняю responseWrapper пустым AdsDto иначе фронт не отображает страницу юзера, у которого нет объявлений
-            // в консоли фронта ошибка Uncaught TypeError: Cannot read properties of undefined (reading 'length') или
-            // ругается на обращение к null, хотя в Swagger требование что мы должны вернуть 404 ошибку
             ArrayList<AdsDto> defaultListEmptyAdsDto = new ArrayList<>();
             responseWrapperAdsDto.setCount(0);
             responseWrapperAdsDto.setResults(defaultListEmptyAdsDto);
@@ -141,11 +136,9 @@ public class AdsServiceImpl implements AdsService {
 
         if (optionalAds.isPresent()) {
 
-            Optional<User> optionslUser = userRepository.findById(optionalAds.get().getAuthor().getId());
-            //FullAdsDto fullAdsDto = adsMapper.adsToFullAdsDto(optionalAds.get(), optionslUser.get());
+            User user = userRepository.findById(optionalAds.get().getAuthor().getId()).orElseThrow();
             List<Image> images = imageRepository.findImagesByAds(optionalAds.get());
-            FullAdsDto fullAdsDto = adsMapper.adsToFullAdsDto(optionalAds.get(), optionslUser.get(), images);
-
+            FullAdsDto fullAdsDto = adsMapper.adsToFullAdsDto(optionalAds.get(), user, images);
             return ResponseEntity.ok(fullAdsDto);
         } else {
             return ResponseEntity.notFound().build();

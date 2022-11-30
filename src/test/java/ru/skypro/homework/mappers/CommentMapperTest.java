@@ -9,6 +9,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import ru.skypro.homework.dto.AdsCommentDto;
 import ru.skypro.homework.models.Comment;
+import ru.skypro.homework.repositories.AdsRepository;
 import ru.skypro.homework.repositories.UserRepository;
 
 import java.util.List;
@@ -22,6 +23,8 @@ import static ru.skypro.homework.constant.ConstantForTests.*;
 class CommentMapperTest {
     @Mock
     UserRepository userRepository;
+    @Mock
+    AdsRepository adsRepository;
     @InjectMocks
     CommentMapper mapper = Mappers.getMapper(CommentMapper.class);
 
@@ -49,6 +52,7 @@ class CommentMapperTest {
 
         LIST_COMMENTS.add(TEST_COMMENT_1);
         LIST_COMMENTS.add(TEST_COMMENT_2);
+
     }
 
     @Test
@@ -65,11 +69,12 @@ class CommentMapperTest {
     void adsCommentDtoToComment_whenMaps_thenCorrect() {
 
         when(userRepository.findById(anyLong())).thenReturn(Optional.of(AUTHOR_1));
+        when(adsRepository.findById(anyLong())).thenReturn(Optional.of(ADS));
 
         Comment comment = mapper.adsCommentDtoToComment(ADS_COMMENT_DTO);
 
-        assertEquals(1L, comment.getId());
-        assertEquals(1, comment.getAuthor().getId());//сначала нужно прописать логику в маппере по обращению к UserRepository
+        assertEquals(ADS, comment.getAdsId());
+        assertEquals(1, comment.getAuthor().getId());
         assertEquals(PARSE_DATE, comment.getCreatedAt());
         assertEquals("text", comment.getText());
 
@@ -84,9 +89,7 @@ class CommentMapperTest {
 
     @Test
     void listCommentsToListAdsCommentDto() {
-
         List<AdsCommentDto> result = mapper.listCommentsToListAdsCommentDto(LIST_COMMENTS);
-
         assertEquals(AdsCommentDto.class, result.get(0).getClass());
     }
 
@@ -96,9 +99,11 @@ class CommentMapperTest {
         ADS_COMMENT_DTO.setCreatedAt(null);
         ADS_COMMENT_DTO.setText("checking patch method");
 
+        when(adsRepository.findById(anyLong())).thenReturn(Optional.of(ADS));
+
         mapper.updateCommentFromAdsCommentDto(ADS_COMMENT_DTO, TEST_COMMENT_2);
 
-        assertEquals(1, TEST_COMMENT_2.getId());
+        assertEquals(2, TEST_COMMENT_2.getId());
         assertEquals(AUTHOR_2, TEST_COMMENT_2.getAuthor());
         assertEquals(PARSE_DATE, TEST_COMMENT_2.getCreatedAt());
         assertEquals("checking patch method", TEST_COMMENT_2.getText());

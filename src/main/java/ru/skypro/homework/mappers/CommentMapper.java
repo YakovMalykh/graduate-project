@@ -30,15 +30,11 @@ public abstract class CommentMapper {
     public abstract Comment adsCommentDtoToComment(AdsCommentDto adsCommentDto);
 
     public User integerToUser(Integer authorId) {
-        // не знаю стоит ли проверять на Null возвращаемое значение, т.к. по логике не могу
-        // представить ситуации, когда у объявления нет автора и его нет в БД
-        return userRepository.findById(authorId.longValue()).get();
-        // fix me
+        return userRepository.findById(authorId.longValue()).orElseThrow();
     }
 
-    public Ads inregerToAds(Integer adsPk) {
-        // fix me
-        return adsRepository.findById(adsPk.longValue()).get();
+    public Ads integerToAds(Integer adsPk) {
+        return adsRepository.findById(adsPk.longValue()).orElseThrow();
     }
 
     public abstract List<AdsCommentDto> listCommentsToListAdsCommentDto(List<Comment> commentsList);
