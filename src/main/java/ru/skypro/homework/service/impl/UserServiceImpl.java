@@ -116,6 +116,7 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<NewPasswordDto> setPassword(NewPasswordDto passwordDto, Authentication auth) {
         log.info("Сервис установки пароля");
         User user = userRepository.getUserByEmailIgnoreCase(auth.getName()).orElseThrow(() -> new UserNotFoundEception());
+        //не знаю, нужно ли тут проверять на пустату, т.к. валидность переданного пароля мы проверяем в контроллере
         if (passwordDto.getNewPassword().isEmpty() || !encoder.matches(passwordDto.getCurrentPassword(), user.getPassword())) {
             log.info("Текущий пароль указан неверно");
             return ResponseEntity.notFound().build();
