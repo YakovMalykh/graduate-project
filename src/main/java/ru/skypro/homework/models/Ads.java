@@ -17,7 +17,7 @@ import java.util.Objects;
 public class Ads {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ads_id")
+    @Column(columnDefinition = "SERIAL", name = "ads_id")
     private Long id;
 
     @ManyToOne

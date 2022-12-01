@@ -14,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 
 
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
@@ -33,6 +35,7 @@ import java.util.List;
 @RequestMapping(value = "/ads")
 @CrossOrigin(value = "http://localhost:3000")
 @RequiredArgsConstructor
+@Validated
 public class AdsController {
     private final AdsService adsService;
     private final CommentService commentService;
@@ -49,9 +52,8 @@ public class AdsController {
     @PreAuthorize("isAuthenticated()")
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<AdsDto> addAds(
-//         @Valid    @Parameter(schema=@Schema(type = "string", format="binary"))
-            @RequestPart("properties") CreateAdsDto createAdsDto, @RequestPart("image") List<MultipartFile> imageList,
-            Authentication authentication
+    @Valid  @RequestPart("properties") CreateAdsDto createAdsDto, @RequestPart("image") List<MultipartFile> imageList,
+    Authentication authentication
     ) {
         log.info("метод добавления нового объявления");
         return adsService.addAdsToDb(createAdsDto, imageList, authentication);
@@ -163,7 +165,7 @@ public class AdsController {
     @PostMapping(value = "/{adsPk}/comments")
     public ResponseEntity<AdsCommentDto> addAdsComment(
             @Parameter(description = "передаем текст комментария")
-            @NotNull
+            @Valid
             @RequestBody AdsCommentDto adsCommentDto,
             @Parameter(description = "передаем первичный ключ объявления")
             @PathVariable Integer adsPk,
@@ -236,7 +238,7 @@ public class AdsController {
     public ResponseEntity<AdsCommentDto> updateAdsComment(
             @PathVariable Integer adsPk,
             @PathVariable Integer id,
-            @RequestBody AdsCommentDto adsCommentDto
+            @Valid @RequestBody AdsCommentDto adsCommentDto
     ) {
         log.info("update comment method");
         return commentService.updateAdsComment(adsPk, id, adsCommentDto);
