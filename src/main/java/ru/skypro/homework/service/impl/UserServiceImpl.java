@@ -98,7 +98,16 @@ public class UserServiceImpl implements UserService {
         headers.setContentLength(avatar.getPrewiew().length);
         return ResponseEntity.status(200).headers(headers).body(avatar.getPrewiew());
     }
-
+    @Override
+    public ResponseEntity<byte[]> getUsersIdImage(Long id) {
+        log.info("Сервис получения аватара текущего юзера");
+        Optional<User> optionalUser = Optional.of(userRepository.findById(id).orElseThrow());
+        Avatar avatar = avatarRepository.findAvatarByUser(optionalUser.get()).orElse(new Avatar()); //bили добавить картинку по умолчанию
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType(avatar.getMediaType()));
+        headers.setContentLength(avatar.getPrewiew().length);
+        return ResponseEntity.status(200).headers(headers).body(avatar.getPrewiew());
+    }
     @Override
     public ResponseEntity<byte[]> updateUserImage(MultipartFile avatarFile, Authentication auth) throws IOException {
         log.info("Сервис обновления аватара текущего юзера");
@@ -109,7 +118,7 @@ public class UserServiceImpl implements UserService {
         }
         Avatar avatar = avatarRepository.findAvatarByUser(optionalUser.get()).orElse(new Avatar());
         avatar.setUser(optionalUser.get());
-       // avatar.setFileSize(avatarFile.getSize());
+        // avatar.setFileSize(avatarFile.getSize());
         avatar.setMediaType(avatarFile.getContentType());
         avatar.setPrewiew(avatarFile.getBytes());
         avatarRepository.save(avatar);
