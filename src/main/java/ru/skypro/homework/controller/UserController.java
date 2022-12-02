@@ -16,9 +16,8 @@ import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.ResponseWrapperUserDto;
 import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.service.UserService;
-
 import javax.validation.Valid;
-import java.io.IOException;
+
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
@@ -68,17 +67,14 @@ public class UserController {
     @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<byte[]> updateUserImage(@RequestPart("image") MultipartFile avatarFile, Authentication auth) {
         log.info("метод обновления аватара");
-        log.info(auth.getName());
-        try {
-            return userService.updateUserImage(avatarFile, auth);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+        return userService.updateUserImage(avatarFile, auth);
+
     }
+
     @GetMapping(value = "/me/image/{id}", produces = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<byte[]> getUserImage(@PathVariable Long id) {
         log.info("метод получения аватара");
-        return userService.getUsersIdImage(id);
+        return userService.getAvatarByUserId(id);
     }
 
     @Operation(
