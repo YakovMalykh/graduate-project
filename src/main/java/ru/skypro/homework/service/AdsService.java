@@ -8,7 +8,7 @@ import ru.skypro.homework.dto.*;
 import java.util.List;
 
 public interface AdsService {
-    ResponseEntity<AdsDto> addAdsToDb(CreateAdsDto createAdsDto, List<MultipartFile> images);
+    ResponseEntity<AdsDto> addAdsToDb(CreateAdsDto createAdsDto, List<MultipartFile> images,Authentication authentication);
 
     ResponseEntity<ResponseWrapperAdsDto> getAllAds();
 

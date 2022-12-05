@@ -1,11 +1,9 @@
 package ru.skypro.homework.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
@@ -18,12 +16,8 @@ import ru.skypro.homework.repositories.CommentRepository;
 import ru.skypro.homework.repositories.ImageRepository;
 import ru.skypro.homework.repositories.UserRepository;
 import ru.skypro.homework.service.AdsService;
-import ru.skypro.homework.service.FileService;
 
-import javax.imageio.ImageIO;
 import javax.transaction.Transactional;
-import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -31,34 +25,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import static java.nio.file.StandardOpenOption.CREATE_NEW;
-
 
 @Slf4j
 @Service
 @Transactional
 public class AdsServiceImpl implements AdsService {
-    @Value("$(image.dir.path)")
-    private String imageDir;
     private final AdsRepository adsRepository;
     private final UserRepository userRepository;
     private final ImageRepository imageRepository;
     private final CommentRepository commentRepository;
     private final AdsMapper adsMapper;
-    private final FileService fileService;
 
-    public AdsServiceImpl(AdsRepository adsRepository, UserRepository userRepository, ImageRepository imageRepository, CommentServiceImpl commentService, CommentRepository commentRepository, AdsMapper adsMapper, FileService fileService) {
+    public AdsServiceImpl(AdsRepository adsRepository, UserRepository userRepository, ImageRepository imageRepository, CommentRepository commentRepository, AdsMapper adsMapper) {
         this.adsRepository = adsRepository;
         this.userRepository = userRepository;
         this.imageRepository = imageRepository;
         this.commentRepository = commentRepository;
         this.adsMapper = adsMapper;
-        this.fileService = fileService;
     }
 
     @Override
-    public ResponseEntity<AdsDto> addAdsToDb(CreateAdsDto createAdsDto, List<MultipartFile> filesList) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    public ResponseEntity<AdsDto> addAdsToDb(CreateAdsDto createAdsDto, List<MultipartFile> filesList, Authentication auth) {
 
         log.info("метод addAdsToD");
         if (createAdsDto != null) {
@@ -86,27 +73,7 @@ public class AdsServiceImpl implements AdsService {
         return ResponseEntity.notFound().build();
     }
 
-    /**
-     * нужен ли нам этот метод? зачем нам файл сохранять в папку?
-     */
-    private Path saveFileIntoFolder(String imageDir, Ads ad, MultipartFile file) throws IOException {
-        // вместо ad.getId() м. прописать tittle, на момент вызоыва метода Id еще null
-        Path filePath = Path.of(imageDir, ad.getTitle() + "_" + fileService.getFileName(file.getOriginalFilename()) + "." + fileService.getExtensions(file.getOriginalFilename()));
-        Files.createDirectories(filePath.getParent());
-        Files.deleteIfExists(filePath);
-
-        try (
-                InputStream is = file.getInputStream();
-                OutputStream os = Files.newOutputStream(filePath, CREATE_NEW);
-                BufferedInputStream bis = new BufferedInputStream(is, 1024);
-                BufferedOutputStream bos = new BufferedOutputStream(os, 1024)
-        ) {
-            bis.transferTo(bos);
-        }
-        return filePath;
-    }
-
-    /**
+      /**
      * этот метод следовало бы размещать в ImageService
      */
     private Image saveImageIntoDb(Ads ad, MultipartFile file) {
@@ -137,7 +104,7 @@ public class AdsServiceImpl implements AdsService {
         List<AdsDto> adsDtoList = adsMapper.listAdsToListAdsDto(adsList);
         responseWrapperAdsDto.setCount(adsDtoList.size());
         responseWrapperAdsDto.setResults(adsDtoList);
-        log.info("получили все объявления " + responseWrapperAdsDto.toString());
+        log.info("получили все объявления " + responseWrapperAdsDto);
         return ResponseEntity.ok(responseWrapperAdsDto);
     }
 
@@ -151,14 +118,11 @@ public class AdsServiceImpl implements AdsService {
             List<AdsDto> adsDtoList = adsMapper.listAdsToListAdsDto(adsList);
             responseWrapperAdsDto.setCount(adsDtoList.size());
             responseWrapperAdsDto.setResults(adsDtoList);
-            log.info("получили объявления обратившегося пользователя" + responseWrapperAdsDto.toString());//удалить позже...
+            log.info("получили объявления обратившегося пользователя" + responseWrapperAdsDto);//удалить позже...
             return ResponseEntity.status(HttpStatus.OK).body(responseWrapperAdsDto);
 
         } else {
             log.info("У пользователя " + username + " еще нет объявлений");
-            // заполняю responseWrapper пустым AdsDto иначе фронт не отображает страницу юзера, у которого нет объявлений
-            // в консоли фронта ошибка Uncaught TypeError: Cannot read properties of undefined (reading 'length') или
-            // ругается на обращение к null, хотя в Swagger требование что мы должны вернуть 404 ошибку
             ArrayList<AdsDto> defaultListEmptyAdsDto = new ArrayList<>();
             responseWrapperAdsDto.setCount(0);
             responseWrapperAdsDto.setResults(defaultListEmptyAdsDto);
@@ -172,11 +136,9 @@ public class AdsServiceImpl implements AdsService {
 
         if (optionalAds.isPresent()) {
 
-            Optional<User> optionslUser = userRepository.findById(optionalAds.get().getAuthor().getId());
-            //FullAdsDto fullAdsDto = adsMapper.adsToFullAdsDto(optionalAds.get(), optionslUser.get());
+            User user = userRepository.findById(optionalAds.get().getAuthor().getId()).orElseThrow();
             List<Image> images = imageRepository.findImagesByAds(optionalAds.get());
-            FullAdsDto fullAdsDto = adsMapper.adsToFullAdsDto(optionalAds.get(), optionslUser.get(), images);
-
+            FullAdsDto fullAdsDto = adsMapper.adsToFullAdsDto(optionalAds.get(), user, images);
             return ResponseEntity.ok(fullAdsDto);
         } else {
             return ResponseEntity.notFound().build();

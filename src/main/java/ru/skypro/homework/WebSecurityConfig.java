@@ -23,7 +23,7 @@ public class WebSecurityConfig {
             "/swagger-ui.html",
             "/v3/api-docs",
             "/webjars/**",
-            "/login", "/register","/images/**"
+            "/login", "/register","/images/**","/users/me/image/**"
     };
 
     public WebSecurityConfig(UserDetailsService userDetailsService) {

@@ -7,24 +7,21 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.security.core.context.SecurityContextHolder;
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.mappers.AdsMapper;
 import ru.skypro.homework.models.Ads;
-import ru.skypro.homework.models.Comment;
-import ru.skypro.homework.models.User;
+import ru.skypro.homework.models.Image;
 import ru.skypro.homework.repositories.AdsRepository;
+import ru.skypro.homework.repositories.ImageRepository;
+import ru.skypro.homework.repositories.UserRepository;
 import ru.skypro.homework.service.impl.AdsServiceImpl;
 
-import javax.validation.constraints.Null;
+
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.times;
 import static ru.skypro.homework.constant.ConstantForTests.*;
 
 
@@ -34,6 +31,11 @@ public class AdsServiceTest {
     private AdsRepository adsRepository;
     @Mock
     private AdsMapper adsMapper;
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private ImageRepository imageRepository;
 
     @InjectMocks
     private AdsServiceImpl adsService;
@@ -51,6 +53,8 @@ public class AdsServiceTest {
 
 
         IMAGE.setFilePath(IMAGE_STR);
+        IMAGE.setId(1L);
+
         LIST_IMAGES.add(IMAGE);
 
         // CREATE_ADS_DTO.setPk(1);
@@ -65,23 +69,32 @@ public class AdsServiceTest {
         ADS_DTO.setTitle(TITLE);
         ADS_DTO.setPrice(PRICE);
 
-        TEST_ADS_1.setId(1l);
+        ADS_DTO_2.setPk(2);
+        ADS_DTO_2.setAuthor(2);
+        ADS_DTO_2.setImage(IMAGE_2_STR);
+        ADS_DTO_2.setPrice(PRICE_2);
+        ADS_DTO_2.setTitle(TITLE_2);
+
+        TEST_ADS_1.setId(1L);
         TEST_ADS_1.setAuthor(AUTHOR_2);
-        TEST_ADS_1.setImages(LIST_IMAGES);
         TEST_ADS_1.setTitle(TITLE);
         TEST_ADS_1.setDescription(DESCRIPTION_2);
         TEST_ADS_1.setPrice(PRICE);
 
         TEST_ADS_2.setId(2L);
         TEST_ADS_2.setAuthor(AUTHOR_2);
-        TEST_ADS_2.setImages(LIST_IMAGES);
         TEST_ADS_2.setTitle(TITLE_2);
         TEST_ADS_2.setDescription(DESCRIPTION_2);
         TEST_ADS_2.setPrice(PRICE_2);
+        TEST_ADS_2.setImage(IMAGE_2_STR);
 
         LIST_ADS_DTO.add(ADS_DTO);
         LIST_ADS.add(TEST_ADS_1);
         LIST_ADS.add(TEST_ADS_2);
+
+
+        LIST_OF_FILES.add(FILE_1);
+        LIST_OF_FILES.add(FILE_2);
     }
 
     @Test
@@ -91,17 +104,23 @@ public class AdsServiceTest {
 
         ResponseEntity<ResponseWrapperAdsDto> response = adsService.getAllAds();
 
-        assertEquals(1, response.getBody().getCount());
-        assertEquals(LIST_ADS_DTO, response.getBody().getResult());
+        assertEquals(2, response.getBody().getCount());
+        assertEquals(LIST_ADS_DTO, response.getBody().getResults());
     }
 
-    /*   @Test
-  void addToDbSuccessful() {
+    @Test
+    void addToDbSuccessful() {
         when(adsMapper.createAdsDtoToAds(any(CreateAdsDto.class))).thenReturn(TEST_ADS_2);
-        when(adsRepository.save(any(Ads.class))).thenReturn(TEST_ADS_2);
+        when(userRepository.getUserByEmailIgnoreCase(anyString())).thenReturn(Optional.of(AUTHOR_1));
+        when(imageRepository.save(any(Image.class))).thenReturn(IMAGE);
 
-        ResponseEntity<AdsDto> response = adsService.addAdsToDb( CREATE_ADS_DTO, LIST_IMAGES);
-        assertNotNull(response);
+        when(adsRepository.save(any(Ads.class))).thenReturn(TEST_ADS_2);
+        when(adsMapper.adsToAdsDto(any(Ads.class))).thenReturn(ADS_DTO_2);
+
+        ResponseEntity<AdsDto> response = adsService.addAdsToDb(CREATE_ADS_DTO, LIST_OF_FILES,AUTHENTICATION);
+
+        assertEquals(ResponseEntity.ok(ADS_DTO_2),response);
+
     }
 
     /*   @Test

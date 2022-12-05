@@ -12,11 +12,11 @@ import ru.skypro.homework.dto.*;
 import ru.skypro.homework.mappers.AdsMapper;
 import ru.skypro.homework.mappers.UserMapper;
 import ru.skypro.homework.models.Avatar;
-import ru.skypro.homework.models.Image;
 import ru.skypro.homework.models.User;
 import ru.skypro.homework.repositories.AvatarRepository;
 import ru.skypro.homework.repositories.UserRepository;
 import ru.skypro.homework.service.UserService;
+import ru.skypro.homework.exception.UserNotFoundEception;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
@@ -31,15 +31,12 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final UserRepository userRepository;
     private final PasswordEncoder encoder;
-    private final AdsMapper adsMapper;
-
     private final AvatarRepository avatarRepository;
 
-    public UserServiceImpl(UserMapper userMapper, UserRepository userRepository, PasswordEncoder encoder, AdsMapper adsMapper, AvatarRepository avatarRepository) {
+    public UserServiceImpl(UserMapper userMapper, UserRepository userRepository, PasswordEncoder encoder, AvatarRepository avatarRepository) {
         this.userMapper = userMapper;
         this.userRepository = userRepository;
         this.encoder = encoder;
-        this.adsMapper = adsMapper;
         this.avatarRepository = avatarRepository;
     }
 
@@ -56,41 +53,31 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<ResponseWrapperUserDto> getUsers() {
         List<User> userList = userRepository.findAll();
         log.info("получаем всех юзеров из БД");
-        if (!userList.isEmpty()) {
-            List<UserDto> listUserDto = userMapper.listUsersToListUserDto(userList);
-            ResponseWrapperUserDto responseWrapperUserDto = new ResponseWrapperUserDto();
-            responseWrapperUserDto.setCount(listUserDto.size());
-            responseWrapperUserDto.setResults(listUserDto);
-            log.info("конвертировали в responseWrapperUserDto и отправляем");
-            return ResponseEntity.ok(responseWrapperUserDto);
-        } else {
-            log.info("юзеров не найдено");
-            return ResponseEntity.notFound().build();
-        }
-
+        List<UserDto> listUserDto = userMapper.listUsersToListUserDto(userList);
+        ResponseWrapperUserDto responseWrapperUserDto = new ResponseWrapperUserDto();
+        responseWrapperUserDto.setCount(listUserDto.size());
+        responseWrapperUserDto.setResults(listUserDto);
+        log.info("конвертировали в responseWrapperUserDto и отправляем");
+        return ResponseEntity.ok(responseWrapperUserDto);
     }
 
+    /**
+     * метод получения данных обратившегося пользователя
+     */
     @Override
     public ResponseEntity<UserDto> getUsersMe(Authentication auth) {
         log.info("Сервис получения текущего юзера");
-        Optional<User> optionalUser = Optional.of(userRepository.getUserByEmailIgnoreCase(auth.getName()).orElseThrow());
-        if (optionalUser.isEmpty()) {
-            log.info("Текущего пользователя не в БД");
-            return ResponseEntity.notFound().build();
-        }
-        UserDto userDto = userMapper.userToUserDto(optionalUser.get());
+        User user = userRepository.getUserByEmailIgnoreCase(auth.getName()).orElseThrow(() -> new UserNotFoundEception());
+        UserDto userDto = userMapper.userToUserDto(user);
         log.info("конвертировали в UserDto и отправляем");
         return ResponseEntity.ok(userDto);
-
-
     }
 
     @Override
-    public ResponseEntity<byte[]> getUsersMeImage(Authentication auth) {
+    public ResponseEntity<byte[]> getAvatarByUserId(Long id) {
         log.info("Сервис получения аватара текущего юзера");
-        log.info(auth.getName());
-        Optional<User> optionalUser = userRepository.getUserByEmailIgnoreCase(auth.getName());
-        Avatar avatar = avatarRepository.findAvatarByUser(optionalUser.get()).orElse(new Avatar()); //bили добавить картинку по умолчанию
+        User user = userRepository.findById(id).orElseThrow(() -> new UserNotFoundEception());
+        Avatar avatar = avatarRepository.findAvatarByUser(user).orElse(new Avatar()); //bили добавить картинку по умолчанию
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.parseMediaType(avatar.getMediaType()));
         headers.setContentLength(avatar.getPrewiew().length);
@@ -98,18 +85,19 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity<byte[]> updateUserImage(MultipartFile avatarFile, Authentication auth) throws IOException {
+    public ResponseEntity<byte[]> updateUserImage(MultipartFile avatarFile, Authentication auth) {
         log.info("Сервис обновления аватара текущего юзера");
-        Optional<User> optionalUser = userRepository.getUserByEmailIgnoreCase(auth.getName());
-        if (optionalUser.isEmpty() || avatarFile.isEmpty()) {
-            log.info("Текущего пользователя нет в БД или не передана картинка");
-            return ResponseEntity.notFound().build();
+        User user = userRepository.getUserByEmailIgnoreCase(auth.getName()).orElseThrow(() -> new UserNotFoundEception());
+        Avatar avatar = avatarRepository.findAvatarByUser(user).orElse(new Avatar());
+        avatar.setUser(user);
+        if (!avatarFile.isEmpty()) {
+            avatar.setMediaType(avatarFile.getContentType());
+            try {
+                avatar.setPrewiew(avatarFile.getBytes());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
-        Avatar avatar = avatarRepository.findAvatarByUser(optionalUser.get()).orElse(new Avatar());
-        avatar.setUser(optionalUser.get());
-       // avatar.setFileSize(avatarFile.getSize());
-        avatar.setMediaType(avatarFile.getContentType());
-        avatar.setPrewiew(avatarFile.getBytes());
         avatarRepository.save(avatar);
         return ResponseEntity.ok().body(avatar.getPrewiew());
     }
@@ -117,12 +105,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<UserDto> updateUser(UserDto userDto, Authentication auth) {
         log.info("Сервис обновления юзера");
-        Optional<User> optionalUser = userRepository.getUserByEmailIgnoreCase(auth.getName());
-        if (optionalUser.isEmpty()) {
-            log.info("Текущего пользователя не в БД");
-            return ResponseEntity.notFound().build();
-        }
-        User user = optionalUser.get();
+        User user = userRepository.getUserByEmailIgnoreCase(auth.getName()).orElseThrow(() -> new UserNotFoundEception());
         userMapper.updateUserFromUserDto(userDto, user);
         userRepository.save(user);
         log.info("fields of user with id: " + user.getId() + " updated");
@@ -132,18 +115,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<NewPasswordDto> setPassword(NewPasswordDto passwordDto, Authentication auth) {
         log.info("Сервис установки пароля");
-        Optional<User> optionalUser = userRepository.getUserByEmailIgnoreCase(auth.getName());
-        if (optionalUser.isEmpty()) {
-            log.info("Текущего пользователя не в БД");
-            return ResponseEntity.notFound().build();
-        }
-        log.info(passwordDto.getCurrentPassword());
-        log.info(optionalUser.get().getPassword());
-        if (passwordDto.getNewPassword().isEmpty() || !encoder.matches(passwordDto.getCurrentPassword(), optionalUser.get().getPassword())) {
+        User user = userRepository.getUserByEmailIgnoreCase(auth.getName()).orElseThrow(() -> new UserNotFoundEception());
+        //не знаю, нужно ли тут проверять на пустату, т.к. валидность переданного пароля мы проверяем в контроллере
+        if (passwordDto.getNewPassword().isEmpty() || !encoder.matches(passwordDto.getCurrentPassword(), user.getPassword())) {
             log.info("Текущий пароль указан неверно");
             return ResponseEntity.notFound().build();
         }
-        User user = optionalUser.get();
         user.setPassword(encoder.encode(passwordDto.getNewPassword()));
         userRepository.save(user);
         log.info("Пароль текущего пользователя обновлен");
@@ -152,22 +129,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public ResponseEntity<UserDto> getUser(Integer id) {
-        Optional<User> optionalUser = userRepository.findById(id.longValue());
-        log.info("получаем юзера из БД");
-        if (optionalUser.isPresent()) {
-            User user = optionalUser.get();
-            UserDto userDto = userMapper.userToUserDto(user);
-            log.info("retrieved user by id: " + id);
-            return ResponseEntity.ok(userDto);
-        } else {
-            log.info("user with id: " + id + " doesn't exist");
-            return ResponseEntity.notFound().build();
-        }
+        log.info("метод получения пользователя по Id");
+        User user = userRepository.findById(id.longValue()).orElseThrow(() -> new UserNotFoundEception());
+        UserDto userDto = userMapper.userToUserDto(user);
+        return ResponseEntity.ok(userDto);
     }
 
     @Override
     public Optional<User> userExists(String username) {
-        return userRepository.getUserByEmailIgnoreCase(username);
+       return userRepository.getUserByEmailIgnoreCase(username);
     }
 
 

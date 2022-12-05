@@ -5,15 +5,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.models.User;
-
-import java.io.IOException;
 import java.util.Optional;
 
 public interface UserService {
-
+    ResponseEntity<byte[]> getAvatarByUserId(Long id);
     boolean createUser(RegisterReqDto registerReqDto);
 
     ResponseEntity<ResponseWrapperUserDto> getUsers();
+
 
     ResponseEntity<UserDto> updateUser(UserDto createUserDto, Authentication auth);
 
@@ -26,9 +25,10 @@ public interface UserService {
 
     Optional<User> userExists(String username);
 
+    /**
+     * метод получения данных обратившегося пользователя
+     */
     ResponseEntity<UserDto> getUsersMe(Authentication auth);
 
-    ResponseEntity<byte[]> getUsersMeImage(Authentication auth);
-
-    ResponseEntity<byte[]> updateUserImage(MultipartFile avatarFile, Authentication auth) throws IOException;
+    ResponseEntity<byte[]> updateUserImage(MultipartFile avatarFile, Authentication auth) ;
 }
